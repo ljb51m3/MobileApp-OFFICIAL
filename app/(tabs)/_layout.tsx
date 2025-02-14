@@ -8,6 +8,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Feather from '@expo/vector-icons/Feather';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -27,6 +28,13 @@ export default function TabLayout() {
           default: {},
         }),
       }}>
+      {/* <Tabs.Screen
+        name="signin"
+        options={{
+          title: 'Sign-In',
+          tabBarIcon: ({ color }) => <FontAwesome name="calendar-check-o" size={28} color="grey" />,
+        }}  
+      /> */}
       <Tabs.Screen
         name="index"
         options={{
@@ -46,6 +54,20 @@ export default function TabLayout() {
         options={{
           title: 'Linking',
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="external-link" color="grey" />,
+        }}  
+      />
+      <Tabs.Screen
+        name="contact"
+        options={{
+          title: 'Contact your Doctor',
+          tabBarIcon: ({ color }) => <Feather name="phone-call" size={28} color="grey" />,
+        }}  
+      />
+      <Tabs.Screen
+        name="tracker"
+        options={{
+          title: 'Track your Health',
+          tabBarIcon: ({ color }) => <FontAwesome name="calendar-check-o" size={28} color="grey" />,
         }}  
       />
     </Tabs>
