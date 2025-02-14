@@ -15,6 +15,7 @@ import { Button } from "react-native";
 // import { View, StyleSheet } from 'react-native';
 import SignIn from "../signin";
 
+// edit
 export default function HomeScreen() {
   return (
     <>
