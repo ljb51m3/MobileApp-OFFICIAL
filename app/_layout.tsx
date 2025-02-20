@@ -1,3 +1,4 @@
+// Theme imports.
 import {
   DarkTheme,
   DefaultTheme,
@@ -9,17 +10,26 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
-
 import { useColorScheme } from "@/hooks/useColorScheme";
 
-import * as AppleAuthentication from "expo-apple-authentication";
-import { View, StyleSheet } from "react-native";
+// Navigation Imports.
+import { NavigationContainer } from "@react-navigation/native";
+//import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+// File imports.
+import SignUpScreen from "./auth/signup";
+import LoginScreen from "./auth/login";
+import TabLayout from "./(tabs)/_layout";
+import { useState } from "react";
+
+import { Redirect } from "expo-router";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+//const Stack = createNativeStackNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -41,13 +51,33 @@ export default function RootLayout() {
   // ********************************************************************************************
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen name="signin" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen
+        name="welcome"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen name="auth/login" options={{ title: "Login" }} />
+      <Stack.Screen name="auth/signup" options={{ title: "Sign Up" }} />
+      <Stack.Screen name="settings" options={{ title: "Settings" }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "" }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 }
+
+//<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+//<Stack.Screen name="+not-found" />
+
+//<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+//<StatusBar style="auto" />
+//</ThemeProvider>
+//<Stack.Screen name="Login" component={LoginScreen} />
+
+/*<Stack.Navigator
+      initialRouteName="Login"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="Tabs" component={TabLayout} />
+    </Stack.Navigator> */

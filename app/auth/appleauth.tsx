@@ -1,7 +1,10 @@
-import * as AppleAuthentication from 'expo-apple-authentication'; 
-import { View, StyleSheet } from 'react-native';
+import * as AppleAuthentication from "expo-apple-authentication";
+import { View, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 
- export default function SignIn() {
+export default function AppleAuth() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <AppleAuthentication.AppleAuthenticationButton
@@ -17,15 +20,19 @@ import { View, StyleSheet } from 'react-native';
                 AppleAuthentication.AppleAuthenticationScope.EMAIL,
               ],
             });
+            console.log("Apple auth success", credential);
+            router.replace("/(tabs)/home");
             // signed in
           } catch (e) {
-            if (e instanceof Error){
-            if (e.message === 'ERR_REQUEST_CANCELED') {
-              // handle that the user canceled the sign-in flow
-            } else {
-              // handle other errors
+            if (e instanceof Error) {
+              if (e.message === "ERR_REQUEST_CANCELED") {
+                // handle that the user canceled the sign-in flow
+                console.log("canceled sign in flow ");
+              } else {
+                // handle other errors
+                console.log("other cancel sign in error ");
+              }
             }
-          }
           }
         }}
       />
@@ -36,8 +43,8 @@ import { View, StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   button: {
     width: 200,

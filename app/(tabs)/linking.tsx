@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Platform } from "react-native";
+import { View, Text, StyleSheet, Image, Platform } from "react-native";
 
 import { Collapsible } from "@/components/Collapsible";
 import { ExternalLink } from "@/components/ExternalLink";
@@ -7,10 +7,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
-import SignIn from "../signin";
-
 export default function TabThreeScreen() {
-  return <SignIn />;
+  return;
 }
 
 const styles = StyleSheet.create({
