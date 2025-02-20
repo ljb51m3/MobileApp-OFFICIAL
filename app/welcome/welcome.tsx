@@ -1,14 +1,14 @@
+/* 
+
+This is the first page users will be directed to when they open the app AND if they are not already authenticated.
+
+If the user is already authenticated, they will not see this screen.
+
+*/
+
 import * as React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { Redirect, useRouter } from "expo-router";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-
+import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function WelcomeScreen() {
@@ -33,7 +33,7 @@ export default function WelcomeScreen() {
 
       <View style={styles.buttonContainer}>
         <Image
-          source={require("../assets/images/eye.png")}
+          source={require("../../assets/images/eye.png")}
           style={{ width: 100, height: 100 }}
         />
         <Text
@@ -46,8 +46,9 @@ export default function WelcomeScreen() {
         >
           Hi There!
         </Text>
+
         <TouchableOpacity
-          onPress={() => router.push("/auth/login")}
+          onPress={() => router.push("/welcome/login")}
           style={styles.button}
         >
           <Text style={{ fontSize: 16, color: "#0f3180", fontWeight: "bold" }}>
@@ -56,7 +57,7 @@ export default function WelcomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => router.push("/auth/signup")}
+          onPress={() => router.push("/welcome/signup")}
           style={styles.button}
         >
           <Text style={{ fontSize: 16, color: "#0f3180", fontWeight: "bold" }}>
@@ -111,17 +112,12 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 1,
   },
-  link: {
-    fontSize: 16,
-    color: "blue",
-    textDecorationLine: "underline",
-  },
   background: {
     position: "absolute",
     left: 0,
     right: 0,
     top: 0,
-    bottom: 400,
+    bottom: 425,
   },
   button: {
     width: 250,

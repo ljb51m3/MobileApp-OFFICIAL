@@ -12,24 +12,11 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
-// Navigation Imports.
-import { NavigationContainer } from "@react-navigation/native";
-//import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-// File imports.
-import SignUpScreen from "./auth/signup";
-import LoginScreen from "./auth/login";
-import TabLayout from "./(tabs)/_layout";
-import { useState } from "react";
-
-import { Redirect } from "expo-router";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-//const Stack = createNativeStackNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -44,22 +31,17 @@ export default function RootLayout() {
     return null;
   }
 
-  // ********************************************************************************************
-  // To create new pages, you must make a new .tsx file within the (tabs) folder.
-  // Check directory to confirm if file is within (tabs).
-  // Unless you need to define a new theme and style sheet, do not call individual pages here.
-  // ********************************************************************************************
-
   return (
     <Stack>
       <Stack.Screen
-        name="welcome"
+        name="welcome/welcome"
         options={{ headerShown: false, title: "" }}
       />
-      <Stack.Screen name="auth/login" options={{ title: "Login" }} />
-      <Stack.Screen name="auth/signup" options={{ title: "Sign Up" }} />
+      <Stack.Screen name="welcome/login" options={{ title: "Sign In" }} />
+      <Stack.Screen name="welcome/signup" options={{ title: "Sign Up" }} />
       <Stack.Screen name="settings" options={{ title: "Settings" }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "" }} />
+      <Stack.Screen name="logout" options={{ headerShown: false, title: "" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

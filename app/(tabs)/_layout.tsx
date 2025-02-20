@@ -13,12 +13,16 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
+import handleSignOut from "../auth/appleauth";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
@@ -39,7 +43,7 @@ export default function TabLayout() {
         },
         headerTintColor: Colors[colorScheme ?? "light"].text,
         headerRight: () => (
-          <TouchableOpacity onPress={() => router.push("/welcome")}>
+          <TouchableOpacity onPress={() => router.push("/logout")}>
             <View style={{ marginRight: 15, alignItems: "center" }}>
               <Feather name="log-out" size={28} color="grey" />
             </View>
@@ -59,43 +63,35 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={24} name="house.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="Calendar Code"
         options={{
-          title: "Explore",
+          title: "Calendar",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <FontAwesome name="calendar-check-o" size={24} color={color} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="linking"
         options={{
-          title: "Linking",
+          title: "My Health",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="external-link" color={color} />
+            <FontAwesome6 name="notes-medical" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="contact"
         options={{
-          title: "Contact your Doctor",
+          title: "My Doctors",
           tabBarIcon: ({ color }) => (
-            <Feather name="phone-call" size={28} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tracker"
-        options={{
-          title: "Track your Health",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="calendar-check-o" size={28} color={color} />
+            <Feather name="phone-call" size={24} color={color} />
           ),
         }}
       />

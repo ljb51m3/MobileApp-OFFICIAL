@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
-export default function TabFourScreen() {
+export default function ContactScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#ff2146", dark: "#570e1a" }}

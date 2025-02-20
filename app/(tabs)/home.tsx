@@ -1,137 +1,329 @@
+//I have no idea if this will work on anything but the web version but it is here regardless
+//The aesthetics will definitely need to be updated but the functionality seems to be working
+
+// run npm install react-native-async-storage/async-storage, and expo-calendar if you don't already have it
+
+// Lily update: it wasn't working on my end bc the eyemascot.jpg image was not in the assets folder
+// i put a placeholder image in for the time being
+
+import React, { useState, useEffect } from "react";
 import {
-  Image,
-  View,
   StyleSheet,
-  TouchableOpacity,
-  Platform,
+  View,
+  Text,
+  Button,
+  TextInput,
+  Image,
+  ScrollView,
+  Switch,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Calendar as CalendarView } from "react-native-calendars";
+import * as ExpoCalendar from "expo-calendar";
+import { Event } from "expo-calendar";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useRouter } from "expo-router";
-
-// edit
 export default function HomeScreen() {
-  const router = useRouter();
-  return (
-    <>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-        headerImage={
-          <Image
-            source={{
-              uri: "https://assets.clevelandclinic.org/transform/74fdb2c6-7781-43b3-bd16-1117e56a3263/eyeFacts-146599805-770x533-1-jpg",
-            }}
-            style={styles.headerImage}
-          />
-        }
-      >
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Welcome back!</ThemedText>
-          <HelloWave />
-        </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-          <ThemedText>
-            Edit{" "}
-            <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-            to see changes. Press{" "}
-            <ThemedText type="defaultSemiBold">
-              {Platform.select({
-                ios: "cmd + d",
-                android: "cmd + m",
-                web: "F12",
-              })}
-            </ThemedText>{" "}
-            to open developer tools.
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          <ThemedText>
-            Tap the Explore tab to learn more about what's included in this
-            starter app.
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-          <ThemedText>
-            When you're ready, run{" "}
-            <ThemedText type="defaultSemiBold">
-              npm run reset-project
-            </ThemedText>{" "}
-            to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-            directory. This will move the current{" "}
-            <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-            <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-          </ThemedText>
+  //const [currentTime, setCurrentTime] = useState<string>(
+  // new Date().toLocaleTimeString()
+  //);
+  const [name, setName] = useState<string>("");
+  const [isNameSet, setIsNameSet] = useState<boolean>(false);
+  const diabetesFacts = [
+    "Less than 50% of patients with diabetes regularly schedule eye exams.",
+    "Diabetes is the leading cause of kidney failure in the United States.",
+    "Over 30 million people in the U.S. have diabetes, but about 1 in 4 don’t know they have it.",
+    "People with diabetes are at a higher risk for heart disease and stroke.",
+    "Diabetes can increase the risk of blindness, nerve damage, and amputations.",
+    "Approximately 90-95% of people with diabetes have Type 2 diabetes.",
+    "Managing blood sugar levels can significantly reduce the risk of diabetes-related complications.",
+    "Diabetes is the 7th leading cause of death in the United States.",
+  ];
 
-          <TouchableOpacity
-            onPress={() => router.push("/welcome")}
-            style={styles.button}
-          >
-            <ThemedText>Sign Out</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-      </ParallaxScrollView>
-    </>
+  const [randomFact, setRandomFact] = useState<string>("");
+  const [events, setEvents] = useState<Event[]>([]);
+
+  //Checklist
+  const [checklist, setChecklist] = useState([
+    { id: 1, task: "Schedule eye exam", completed: false },
+    { id: 2, task: "Check blood sugar levels", completed: false },
+    { id: 3, task: "Take prescribed medication", completed: false },
+    { id: 4, task: "Exercise for 30 minutes", completed: false },
+    { id: 5, task: "Eat a healthy meal", completed: false },
+  ]);
+
+  // Get Name from AsyncStorage
+  useEffect(() => {
+    const getStoredName = async () => {
+      try {
+        const storedName = await AsyncStorage.getItem("userName");
+        if (storedName) {
+          setName(storedName);
+          setIsNameSet(true);
+        }
+      } catch (error) {
+        console.error("Failed to load name", error);
+      }
+    };
+    getStoredName();
+  }, []);
+
+  const saveName = async () => {
+    try {
+      await AsyncStorage.setItem("userName", name);
+      setIsNameSet(true);
+    } catch (error) {
+      console.error("Failed to save name", error);
+    }
+  };
+
+  // Get Time
+  /*
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const time = new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      setCurrentTime(time);
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+  */
+  // Select random fact from array
+  useEffect(() => {
+    const fact =
+      diabetesFacts[Math.floor(Math.random() * diabetesFacts.length)];
+    setRandomFact(fact);
+  }, []);
+
+  // Get events from calendar
+  useEffect(() => {
+    (async () => {
+      const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
+      if (status === "granted") {
+        const calendars = await ExpoCalendar.getCalendarsAsync(
+          ExpoCalendar.EntityTypes.EVENT
+        );
+        if (calendars.length > 0) {
+          const calendarIds = calendars.map((calendar) => calendar.id);
+          const events = await ExpoCalendar.getEventsAsync(
+            calendarIds,
+            new Date(),
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
+          );
+          setEvents(events);
+        }
+      }
+    })();
+  }, []);
+
+  //Toggle Task Completion
+  const toggleTaskCompletion = (id: number) => {
+    setChecklist((prevChecklist) =>
+      prevChecklist.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.welcomeText}>Welcome!</Text>
+        {/* Name below Welcome! */}
+        {!isNameSet ? (
+          <>
+            <TextInput
+              style={styles.nameInput}
+              placeholder="Enter your name"
+              value={name}
+              onChangeText={setName}
+            />
+            <Button title="Save Name" onPress={saveName} />
+          </>
+        ) : (
+          <Text style={styles.nameText}>{name}</Text>
+        )}
+
+        {/* Welcome message */}
+        <Text style={styles.welcomeMessage}>How's it going today?</Text>
+
+        {/* Fun Fact Section */}
+        <View style={styles.factContainer}>
+          <Image
+            source={require("../../assets/images/eye.png")}
+            style={styles.image}
+          />
+          <View style={[styles.bubble, { marginLeft: 30 }]}>
+            <Text style={styles.bubbleText}>Did you know: {randomFact}</Text>
+          </View>
+        </View>
+
+        {/*Checklist Section*/}
+        <View style={styles.checklistContainer}>
+          <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
+          {checklist.map((item) => (
+            <View key={item.id} style={styles.checklistItem}>
+              <Switch
+                value={item.completed}
+                onValueChange={() => toggleTaskCompletion(item.id)}
+              />
+              <Text
+                style={[
+                  styles.checklistText,
+                  item.completed && styles.completedTask,
+                ]}
+              >
+                {item.task}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Calendar Section*/}
+        <View style={styles.calendarContainer}>
+          <CalendarView
+            onDayPress={(day: any) => {
+              console.log("selected day", day);
+            }}
+            markedDates={events.reduce((acc, event) => {
+              const date = event.startDate.toString().split("T")[0];
+              return { ...acc, [date]: { marked: true } };
+            }, {})}
+            style={styles.calendar}
+          />
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
-// ********************************************************************************************
-// To add new styles, define them here.
-// Call styles above using 'styles.<style_name>'
-// ********************************************************************************************
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    paddingTop: 10,
+    paddingLeft: 10,
+  },
+  /*
+  time: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "black",
+  },*/
+  welcomeText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginTop: 20,
+    color: "black",
+    marginLeft: 20,
+  },
+  nameInput: {
+    fontSize: 20,
+    marginTop: 10,
+    color: "black",
+    marginLeft: 20,
+    borderBottomWidth: 1,
+    width: "80%",
+    padding: 5,
+  },
+  nameText: {
+    fontSize: 24,
+    marginTop: 2,
+    color: "black",
+    marginLeft: 20,
+    fontWeight: "bold",
+  },
+  welcomeMessage: {
+    fontSize: 15,
+    marginTop: 10,
+    color: "black",
+    marginLeft: 20,
+  },
+  image: {
+    marginTop: 5,
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+  },
+  factContainer: {
+    flexDirection: "row",
+    marginTop: 20,
+    alignItems: "flex-start",
+    marginLeft: 10,
+  },
+  bubble: {
+    padding: 10,
+    backgroundColor: "#f0f8ff",
+    borderRadius: 10,
+    maxWidth: "50%",
+    borderWidth: 2,
+    borderColor: "#5e81c2",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  bubbleText: {
+    fontSize: 15,
+    color: "#333",
+    fontStyle: "italic",
+  },
+  calendarContainer: {
+    marginTop: 20,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 20,
+  },
+  calendar: {
+    width: 335,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  checklistContainer: {
+    width: 335,
+    marginTop: 20,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 20,
+  },
+  checklistTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "black",
+  },
+  checklistItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-  // 'headerImage' is a style I defined and called above to display a picture from the web.
-  headerImage: {
-    height: 320,
-    width: 375,
-    bottom: -40,
-    left: 0,
-    position: "absolute",
-  },
-  buttonContainer: {
-    backgroundColor: "pink",
-    padding: 5,
-    borderRadius: 1,
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 20,
-    textAlign: "center",
-  },
-  button: {
-    width: 250,
-    backgroundColor: "#d6f3ff",
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
+    paddingVertical: 5,
+    padding: 10,
     borderWidth: 1,
-    borderColor: "#a6e6ff",
+    borderColor: "#ddd",
+    borderRadius: 8,
+    backgroundColor: "#e0f7fa",
+    width: "100%",
+  },
+  checklistText: {
+    fontSize: 16,
+    color: "black",
+    marginLeft: 10,
+  },
+  completedTask: {
+    color: "#a9a9a9",
+  },
+  scrollContainer: {
+    paddingBottom: 20,
   },
 });
+
+/*
+
+return (time stuff)
+<Text style={styles.time}>{currentTime}</Text>
+
+
+
+*/

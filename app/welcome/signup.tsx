@@ -1,16 +1,20 @@
+/*
+
+Sign up screen. Almost identical to Login screen. Users that press the 'Sign up' button
+will be redirected here.
+
+Make sure package 'LinearGradient' is installed. Run npm install expo-linear-gradient
+
+*/
+
 import * as React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import AppleAuth from "./appleauth";
+import { View, Text, StyleSheet, Linking } from "react-native";
+import AppleAuth from "../auth/appleauth";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-
-export default function LoginScreen() {
+export default function SignUpScreen() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -22,17 +26,21 @@ export default function LoginScreen() {
         ]}
         style={styles.background}
       />
-      <Text
-        style={{
-          color: "#ffffff",
-          fontWeight: "bold",
-          marginTop: 100,
-          textAlign: "center",
-        }}
-      >
-        Get started by signing in below with your Apple ID.
+      <Text style={[styles.text, { marginBottom: 50 }]}>
+        To register an account, create an{" "}
+        <Text
+          style={[styles.link, { color: "rgb(172, 255, 168)" }]}
+          onPress={() => router.push("https://support.apple.com/en-us/108647")}
+        >
+          AppleID.
+        </Text>{" "}
       </Text>
-      <AppleAuth />
+      <Text style={styles.text}>
+        Already have an account? Sign in{" "}
+        <Text style={styles.link} onPress={() => router.push("/welcome/login")}>
+          here.
+        </Text>{" "}
+      </Text>
     </View>
   );
 }
@@ -43,7 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ffffff",
-    padding: 75,
+    padding: 50,
+  },
+  text: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 25,
+    textAlign: "center",
   },
   title: {
     flex: 1,
@@ -66,8 +80,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 1,
   },
   link: {
-    fontSize: 16,
-    color: "blue",
+    fontSize: 25,
+    color: "rgb(252, 210, 255)",
     textDecorationLine: "underline",
   },
   background: {
@@ -90,15 +104,3 @@ const styles = StyleSheet.create({
     borderColor: "#a6e6ff",
   },
 });
-
-/*  type RootStackParamList = {
-    Login: undefined;
-    SignUp: undefined;
-  };
-
-  type LoginScreenNavigationProp = StackNavigationProp<
-    RootStackParamList,
-    "Login"
-  >;
-
-  const navigation = useNavigation<LoginScreenNavigationProp>(); */
