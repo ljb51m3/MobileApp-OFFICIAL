@@ -1,57 +1,64 @@
-import { StyleSheet, Image, Platform } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, Platform } from "react-native";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+const doctorInfo = [
+  {id: '1', doctorName : 'Dr. Example', doctorPhone : '+1(234)567-8910'},
+  {id: '2', doctorName : 'Dr. Ejemplo', doctorPhone : '+2(345)678-9101'},
+  {id: '3', doctorName : 'Dr. Exemple', doctorPhone : '+3(456)789-1012'}
+]
 
-export default function ContactScreen() {
+const DoctorItem = ({doctorName, doctorPhone}: {doctorName: string, doctorPhone: string}) => (
+  <View style={styles.doctorItem}>
+    <Text style={styles.doctorName}>{doctorName}</Text>
+    <Text style={styles.doctorContact}>{doctorPhone}</Text>
+  </View>
+);
+
+const ContactYourDoctor = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#ff2146", dark: "#570e1a" }}
-      headerImage={
-        <IconSymbol
-          size={250}
-          color="#ffcfd7"
-          name="figure.taichi"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Linking</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This is an example page for linking MyChart and MyBILH.
-      </ThemedText>
-      <Collapsible title="MyChart">
-        <ThemedText>test test test test</ThemedText>
-        <ExternalLink href="https://www.mychart.org/">
-          <ThemedText type="link">Go to MyChart Website Now</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="MyBILH">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.header}>Contact Your Doctor</Text>
+      <FlatList
+        data={doctorInfo}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <DoctorItem doctorName={item.doctorName} doctorPhone={item.doctorPhone} />}
+      />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  doctorItem: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  doctorName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  doctorContact: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
   },
 });
+
+export default ContactYourDoctor;
