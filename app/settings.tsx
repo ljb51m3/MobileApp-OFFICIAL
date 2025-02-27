@@ -123,7 +123,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     marginVertical: 10,
-    color: "white",
   },
   checklistContainer: {
     marginTop: 20,
