@@ -125,7 +125,19 @@ export default function HomeScreen() {
       )
     );
   };
-
+  
+// Add the isAppCreatedEvent function
+  const isAppCreatedEvent = (event: ExpoCalendar.Event) => {
+    // Debug logging
+    console.log('Checking event:', {
+      id: event.id,
+      title: event.title,
+      calendarId: event.calendarId
+    });
+    
+    return event.calendarId === '1AD179B2-8C13-4B1E-B0CA-7AFC9843C804';
+  };
+  
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -188,8 +200,66 @@ export default function HomeScreen() {
             }}
             markedDates={events.reduce((acc, event) => {
               const date = event.startDate.toString().split("T")[0];
-              return { ...acc, [date]: { marked: true } };
-            }, {})}
+              const isAppEvent = isAppCreatedEvent(event);
+              console.log('Processing event:', {
+                date,
+                isAppEvent,
+                calendarId: event.calendarId,
+                title: event.title
+              });
+              const existingMarking = acc[date] || {};
+              // Check if this date already has an app event
+              const hasExistingAppEvent = existingMarking.customStyles?.container?.backgroundColor === '#FFE6E6';
+              
+              // If this is an app event or the date already has an app event, use app event styling
+              const shouldUseAppStyling = isAppEvent || hasExistingAppEvent;
+
+    
+              return { 
+                ...acc, 
+                [date]: { 
+                  ...existingMarking,
+                  dots: shouldUseAppStyling ? [
+                    { color: '#FF0000', key: 'top', size: 10 },
+                    { color: '#FF0000', key: 'right', size: 10 },
+                    { color: '#FF0000', key: 'bottom', size: 10 },
+                    { color: '#FF0000', key: 'left', size: 10 }
+                  ] : [
+                    { color: '#666666', key: 'regular', size: 4 }
+                  ],
+                  marked: true } };
+                  customStyles: shouldUseAppStyling ? {
+                    container: {
+                      backgroundColor: '#FFE6E6',
+                      borderWidth: 2,
+                      borderColor: '#FF0000',
+                      borderRadius: 5,
+                    },
+                    text: {
+                      color: '#FF0000',
+                      fontWeight: 'bold'
+                    }
+                  } : undefined
+                }
+              };
+            }, {} as Record<string, any>)}
+            markingType={'custom'}
+            theme={{
+              backgroundColor: '#ffffff',
+              calendarBackground: '#ffffff',
+              selectedDayBackgroundColor: '#2E66E7',
+              selectedDayTextColor: '#FFFFFF',
+              todayTextColor: '#2E66E7',
+              dayTextColor: '#2d4150',
+              textDisabledColor: '#d9e1e8',
+              dotColor: '#666666',
+              selectedDotColor: '#FFFFFF',
+              arrowColor: '#2E66E7',
+              monthTextColor: '#2d4150',
+              textDayFontSize: 16,
+              textMonthFontSize: 16,
+              textDayHeaderFontSize: 16
+            }}
             style={styles.calendar}
           />
         </View>
