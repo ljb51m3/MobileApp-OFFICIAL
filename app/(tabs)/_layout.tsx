@@ -95,6 +95,15 @@ export default function TabLayout() {
           ),
         }}
       />
-    </Tabs>
+      <Tabs.Screen
+      name="Mascot"
+      options={{
+        title: "Mascot",
+        tabBarIcon: ({ color }) => (
+          <Feather name="eye" size={24} color={color} />
+        ),
+      }}
+    />
+  </Tabs>
   );
 }
