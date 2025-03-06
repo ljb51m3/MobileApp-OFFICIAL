@@ -55,12 +55,15 @@ export default function CalendarScreen() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showTimePickerModal, setShowTimePickerModal] = useState(false);
   const [isStartTime, setIsStartTime] = useState(true);
+  const [selectedClassification, setSelectedClassification] = useState("personal");
+  const [showClassificationModal, setShowClassificationModal] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
     location: "",
     notes: "",
     startTime: "12:00",
     endTime: "1:00",
+    classification: "personal",
   });
   const [startPeriod, setStartPeriod] = useState("AM");
   const [endPeriod, setEndPeriod] = useState("AM");
@@ -89,6 +92,47 @@ export default function CalendarScreen() {
     { label: "1 week before", value: "10080", selected: false },
     { label: "2 weeks before", value: "20160", selected: false },
   ];
+
+  type EventClassification = {
+    label: string;
+    value: string;
+    selected: boolean;
+  };
+
+  const EventClassification: EventClassification[] = [
+    {label: "Personal", value: "personal", selected: false},
+    {label: "Eye Exam", value: "eye-exam", selected: false},
+    {label: "Doctor Appointment", value: "doctor-appointment", selected: false},
+    {label: "Other", value: "other", selected: false},
+];
+
+// Add this near the EventClassification definition
+const eventTypeStyles = {
+  'personal': {
+    color: '#4A90E2',
+    backgroundColor: '#EBF3FC',
+    borderColor: '#4A90E2',
+    emoji: '👤'
+  },
+  'eye-exam': {
+    color: '#FF6B6B',
+    backgroundColor: '#FFE6E6',
+    borderColor: '#FF6B6B',
+    emoji: '👁️'
+  },
+  'doctor-appointment': {
+    color: '#50C878',
+    backgroundColor: '#E6F5EC',
+    borderColor: '#50C878',
+    emoji: '👨‍⚕️'
+  },
+  'other': {
+    color: '#9B59B6',
+    backgroundColor: '#F4ECF7',
+    borderColor: '#9B59B6',
+    emoji: '��'
+  }
+} as const;
 
   const generateTimeOptions = () => {
     const times = [];
@@ -267,7 +311,7 @@ export default function CalendarScreen() {
         endDate,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         location: newEvent.location,
-        notes: newEvent.notes,
+        notes: `[Classification: ${newEvent.classification}]\n${newEvent.notes || ''}`,
         alarms: alarms,
       });
 
@@ -278,8 +322,10 @@ export default function CalendarScreen() {
         notes: "",
         startTime: "12:00",
         endTime: "1:00",
+        classification: "personal",
       });
       setSelectedAlerts(["15"]); // Reset to default state
+      setSelectedClassification("personal");
       setShowEventModal(false);
       Alert.alert("Success", "Event added successfully!");
 
@@ -347,6 +393,24 @@ export default function CalendarScreen() {
     
     // Check specifically for the app's calendar ID
     return event.calendarId === '1AD179B2-8C13-4B1E-B0CA-7AFC9843C804';
+  };
+
+  // Add this helper function near the top of the component
+  const parseEventDetails = (event: ExpoCalendar.Event) => {
+    const notes = event.notes || '';
+    const classificationMatch = notes.match(/\[Classification: (.*?)\]\n?(.*)/s);
+    
+    if (classificationMatch) {
+      return {
+        classification: classificationMatch[1],
+        notes: classificationMatch[2].trim()
+      };
+    }
+    
+    return {
+      classification: 'other',
+      notes: notes.trim()
+    };
   };
 
   return (
@@ -454,7 +518,7 @@ export default function CalendarScreen() {
               setSelectedDate(day.dateString);
             }}
             markedDates={Object.entries(
-              events.reduce<{ [key: string]: { hasAppEvent: boolean; events: ExpoCalendar.Event[] } }>(
+              events.reduce<{ [key: string]: { hasAppEvent: boolean; events: ExpoCalendar.Event[]; classification?: string } }>(
                 (acc, event: ExpoCalendar.Event) => {
                   const eventDate = new Date(event.startDate);
                   const date = eventDate.toISOString().split('T')[0];
@@ -463,10 +527,11 @@ export default function CalendarScreen() {
                     acc[date] = { hasAppEvent: false, events: [] };
                   }
                   
-                  // Check if this is an app event
                   const isAppEvent = isAppCreatedEvent(event);
                   if (isAppEvent) {
                     acc[date].hasAppEvent = true;
+                    const { classification } = parseEventDetails(event);
+                    acc[date].classification = classification;
                   }
                   
                   acc[date].events.push(event);
@@ -476,43 +541,34 @@ export default function CalendarScreen() {
               )
             ).reduce<MarkedDates>((markings, [date, dateData]) => {
               const isSelected = date === selectedDate;
+              const eventStyle = dateData.classification ? eventTypeStyles[dateData.classification as keyof typeof eventTypeStyles] : undefined;
               
               return {
                 ...markings,
                 [date]: {
                   marked: true,
                   selected: isSelected,
-                  selectedColor: '#2E66E7',
+                  selectedColor: isSelected ? (eventStyle?.color || '#2E66E7') : (eventStyle?.backgroundColor || '#f0f0f0'),
                   selectedTextColor: '#FFFFFF',
                   dots: dateData.hasAppEvent ? [
-                    { color: '#FF0000', key: 'top', size: 10 },
-                    { color: '#FF0000', key: 'right', size: 10 },
-                    { color: '#FF0000', key: 'bottom', size: 10 },
-                    { color: '#FF0000', key: 'left', size: 10 }
+                    { color: eventStyle?.color || '#666666', key: 'regular', size: 4 }
                   ] : [
                     { color: '#666666', key: 'regular', size: 4 }
                   ],
                   customStyles: dateData.hasAppEvent ? {
                     container: {
-                      backgroundColor: '#FFE6E6',
+                      backgroundColor: isSelected ? (eventStyle?.color || '#2E66E7') : (eventStyle?.backgroundColor || '#f0f0f0'),
+                      borderWidth: 1,
+                      borderColor: eventStyle?.borderColor || '#ddd'
                     },
                     text: {
-                      color: isSelected ? '#FFFFFF' : '#FF0000',
+                      color: isSelected ? '#FFFFFF' : (eventStyle?.color || '#333'),
                       fontWeight: 'bold'
                     }
                   } : undefined
                 }
               };
-            }, {
-              [selectedDate]: events.some((event: ExpoCalendar.Event) => {
-                const eventDate = new Date(event.startDate);
-                return eventDate.toISOString().split('T')[0] === selectedDate;
-              }) ? undefined : {
-                selected: true,
-                selectedColor: '#2E66E7',
-                selectedTextColor: '#FFFFFF'
-              }
-            } as MarkedDates)}
+            }, {} as MarkedDates)}
             markingType={'custom'}
             theme={{
               backgroundColor: '#ffffff',
@@ -527,8 +583,12 @@ export default function CalendarScreen() {
               arrowColor: '#2E66E7',
               monthTextColor: '#2d4150',
               textDayFontSize: 16,
-              textMonthFontSize: 16,
-              textDayHeaderFontSize: 16
+              textMonthFontSize: 18,
+              textDayHeaderFontSize: 16,
+              textSectionTitleColor: '#2d4150',
+              textDayFontWeight: '600',
+              textMonthFontWeight: 'bold',
+              textDayHeaderFontWeight: '600'
             }}
             style={{
               height: 370,
@@ -553,6 +613,7 @@ export default function CalendarScreen() {
               {getEventsForDate(selectedDate).map((event: ExpoCalendar.Event, index: number) => {
                 const isExpanded = expandedEventId === event.id;
                 const isAppEvent = isAppCreatedEvent(event);
+                const { classification, notes } = parseEventDetails(event);
 
                 return (
                   <TouchableOpacity
@@ -577,11 +638,15 @@ export default function CalendarScreen() {
                   >
                     <View
                       style={{
-                        backgroundColor: isAppEvent ? '#FFE6E6' : '#f0f0f0',
+                        backgroundColor: isAppEvent 
+                          ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.backgroundColor || '#f0f0f0')
+                          : '#f0f0f0',
                         padding: 15,
                         borderRadius: 6,
                         borderWidth: isAppEvent ? 2 : 0,
-                        borderColor: '#FF0000',
+                        borderColor: isAppEvent 
+                          ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd')
+                          : '#ddd',
                       }}
                     >
                       <View
@@ -596,14 +661,19 @@ export default function CalendarScreen() {
                             fontWeight: isAppEvent ? "800" : "bold",
                             flex: 1,
                             fontSize: isAppEvent ? 18 : 16,
-                            color: isAppEvent ? '#FF0000' : '#000000',
+                            color: isAppEvent 
+                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333')
+                              : '#333',
                           }}
                         >
-                          {isAppEvent ? "🔷 " : ""}{event.title}
+                          {isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.emoji || '🔷') : ""}{" "}
+                          {event.title}
                         </Text>
                         <Text
                           style={{
-                            color: isAppEvent ? '#FF0000' : '#666',
+                            color: isAppEvent 
+                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#666')
+                              : '#666',
                             fontSize: 14,
                             fontWeight: isAppEvent ? "600" : "normal",
                           }}
@@ -618,27 +688,46 @@ export default function CalendarScreen() {
                             marginTop: 10,
                             paddingTop: 10,
                             borderTopWidth: 1,
-                            borderTopColor: isAppEvent ? '#FFB3B3' : '#ddd',
+                            borderTopColor: isAppEvent 
+                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd')
+                              : '#ddd',
                             backgroundColor: isAppEvent ? '#FFFFFF' : undefined,
                             padding: isAppEvent ? 12 : 0,
                             borderRadius: isAppEvent ? 6 : 0,
                             borderWidth: isAppEvent ? 1 : 0,
-                            borderColor: '#FFB3B3',
+                            borderColor: eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd',
                           }}
                         >
+                          {isAppEvent && (
+                            <Text
+                              style={{
+                                marginBottom: 8,
+                                color: eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333',
+                                fontSize: 15,
+                                fontWeight: "600",
+                              }}
+                            >
+                              {eventTypeStyles[classification as keyof typeof eventTypeStyles]?.emoji || ''}
+                              {" Type: "}{EventClassification.find(c => c.value === classification)?.label || classification}
+                            </Text>
+                          )}
+                          
+                          {notes && (
+                            <Text
+                              style={{
+                                marginBottom: 8,
+                                color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#333',
+                                fontSize: isAppEvent ? 16 : 14,
+                                fontWeight: isAppEvent ? "600" : "normal",
+                              }}
+                            >
+                              {notes}
+                            </Text>
+                          )}
+                          
                           <Text
                             style={{
-                              marginBottom: 8,
-                              color: isAppEvent ? '#FF0000' : '#333',
-                              fontSize: isAppEvent ? 16 : 14,
-                              fontWeight: isAppEvent ? "600" : "normal",
-                            }}
-                          >
-                            {event.notes || "No notes"}
-                          </Text>
-                          <Text
-                            style={{
-                              color: isAppEvent ? '#FF0000' : '#666',
+                              color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#666',
                               fontSize: isAppEvent ? 15 : 14,
                               fontWeight: isAppEvent ? "600" : "normal",
                               marginTop: isAppEvent ? 8 : 0,
@@ -651,7 +740,7 @@ export default function CalendarScreen() {
                             <Text
                               style={{
                                 marginTop: 8,
-                                color: isAppEvent ? '#FF0000' : '#666',
+                                color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#666',
                                 fontSize: isAppEvent ? 15 : 14,
                                 fontWeight: isAppEvent ? "600" : "normal",
                               }}
@@ -848,6 +937,23 @@ export default function CalendarScreen() {
                 </TouchableOpacity>
               </View>
 
+              <View style={{ marginBottom: 20 }}>
+                <Text style={{ marginBottom: 5 }}>Event Type</Text>
+                <TouchableOpacity
+                  onPress={() => setShowClassificationModal(true)}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ddd",
+                    padding: 15,
+                    borderRadius: 5,
+                  }}
+                >
+                  <Text>
+                    {EventClassification.find(c => c.value === newEvent.classification)?.label || "Select type"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
               <View
                 style={{
                   flexDirection: "row",
@@ -871,8 +977,10 @@ export default function CalendarScreen() {
                       notes: "",
                       startTime: "12:00",
                       endTime: "1:00",
+                      classification: "personal",
                     });
                     setSelectedAlerts(["15"]);
+                  
                     setSelectedEventDate(new Date().toISOString().split("T")[0]);
                     
                     // Reset time states
@@ -1283,6 +1391,105 @@ export default function CalendarScreen() {
                     >
                       <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
                         Confirm Reminders
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+
+              {/* Classification Modal */}
+              <Modal
+                visible={showClassificationModal}
+                animationType="slide"
+                transparent={true}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    justifyContent: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: "white",
+                      margin: 20,
+                      padding: 20,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        marginBottom: 15,
+                        textAlign: "center",
+                      }}
+                    >
+                      Select Event Type
+                    </Text>
+
+                    {EventClassification.map((option) => (
+                      <TouchableOpacity
+                        key={option.value}
+                        onPress={() => {
+                          setNewEvent({ ...newEvent, classification: option.value });
+                          setSelectedClassification(option.value);
+                          setShowClassificationModal(false);
+                        }}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          padding: 20,
+                          borderBottomWidth: 1,
+                          borderBottomColor: "#eee",
+                          backgroundColor: newEvent.classification === option.value ? '#f0f8ff' : 'white',
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            borderWidth: 2,
+                            borderColor: "#2E66E7",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginRight: 15,
+                          }}
+                        >
+                          {newEvent.classification === option.value && (
+                            <View
+                              style={{
+                                width: 16,
+                                height: 16,
+                                borderRadius: 8,
+                                backgroundColor: "#2E66E7",
+                              }}
+                            />
+                          )}
+                        </View>
+                        <Text style={{ 
+                          fontSize: 18,
+                          color: newEvent.classification === option.value ? '#2E66E7' : '#333',
+                        }}>
+                          {option.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+
+                    <TouchableOpacity
+                      onPress={() => setShowClassificationModal(false)}
+                      style={{
+                        backgroundColor: "#2E66E7",
+                        padding: 15,
+                        borderRadius: 8,
+                        marginTop: 20,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                        Cancel
                       </Text>
                     </TouchableOpacity>
                   </View>
