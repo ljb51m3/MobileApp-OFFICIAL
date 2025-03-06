@@ -13,6 +13,7 @@ import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AppleAuth() {
   const router = useRouter();
@@ -31,6 +32,11 @@ export default function AppleAuth() {
     checkStoredCredential();
   }, []);
 
+  const resetFirstTimeFlag = async () => {
+    await AsyncStorage.removeItem("hasSignedInBefore");
+    console.log("Reset first-time flag");
+  };
+
   const handleSignIn = async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -45,7 +51,16 @@ export default function AppleAuth() {
         JSON.stringify(credential)
       );
       setUser(credential);
-      router.replace("/(tabs)/home");
+      const isFirstTime = await AsyncStorage.getItem("hasSignedInBefore");
+
+      if (!isFirstTime) {
+        console.log("not signed in before");
+        router.replace("/welcome/survey"); // First-time user → Survey
+        await AsyncStorage.setItem("hasSignedInBefore", "true");
+      } else {
+        console.log("hasSignedInBefore");
+        router.replace("/(tabs)/home"); // Returning user → Home
+      }
     } catch (e) {
       if (e instanceof Error) {
         if (e.message === "ERR_REQUEST_CANCELED") {
@@ -76,9 +91,27 @@ export default function AppleAuth() {
           onPress={handleSignIn}
         />
       ) : (
-        <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-          <Text style={styles.text}>Sign Out</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            onPress={handleSignOut}
+            style={styles.signOutButton}
+          >
+            <Text style={styles.text}>Sign Out</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={resetFirstTimeFlag}>
+            <Text
+              style={{
+                fontSize: 20,
+                color: "blue",
+                margin: 20,
+                textAlign: "center",
+              }}
+            >
+              Reset First-Time User (Dev only)
+            </Text>
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
