@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Calendar as CalendarView } from "react-native-calendars";
 import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
+import * as Notifications from "expo-notifications";
 
 export default function HomeScreen() {
   //const [currentTime, setCurrentTime] = useState<string>(

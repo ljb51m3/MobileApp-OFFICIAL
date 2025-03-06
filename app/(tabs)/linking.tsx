@@ -3,6 +3,8 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Linking,
+  Alert,
   Image,
   Platform,
   Touchable,
@@ -18,13 +20,25 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function LinkingScreen() {
   const router = useRouter();
+  const openApp = async () => {
+    const url = "mychart://";
+    const urlFallBack = "https://www.mychart/org/";
+
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("app not installed", "please install app first");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
         Want to view your health records and test results?
       </Text>
       <TouchableOpacity
-        onPress={() => router.push("https://www.mychart.org/")}
+        onPress={openApp}
         style={[
           styles.button,
           { backgroundColor: "#ffc9c9", borderColor: "#ff6363" },
