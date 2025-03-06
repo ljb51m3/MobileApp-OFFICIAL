@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     paddingTop: 10,
+    paddingBottom: 60,
     paddingLeft: 10,
   },
   /*
