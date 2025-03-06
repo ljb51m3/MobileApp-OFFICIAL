@@ -39,6 +39,7 @@ export default function SurveyScreen() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [surveyComplete, setSurveyComplete] = useState(false);
   const [surveyStarted, setSurveyStarted] = useState(false); // Track whether the survey has started
+  const [showButton, setShowButton] = useState(false); // Track when to show the button
 
   const handleAnswer = (emoji: string) => {
     const updatedAnswers = [
@@ -63,6 +64,7 @@ export default function SurveyScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSurveyStarted(true); // Set survey as started after 2 seconds
+      setShowButton(true); // Show the button after the intro is shown
     }, 2000); // 2 seconds delay before starting the survey
 
     return () => clearTimeout(timer); // Clean up the timer if the component unmounts
@@ -122,18 +124,22 @@ export default function SurveyScreen() {
           )}
         </>
       )}
-      <View style={styles.endContainer}>
-        <Text style={{ color: "grey", fontSize: 15, textAlign: "center" }}>
-          Don't want to answer these questions? No worries! Click on the button
-          below to see your home page.
-        </Text>
-        <TouchableOpacity
-          style={styles.regularButton}
-          onPress={() => router.push("/(tabs)/home")}
-        >
-          <Text style={{ color: "white", fontSize: 10 }}>Go Home</Text>
-        </TouchableOpacity>
-      </View>
+
+      {/* Only show button after survey intro */}
+      {showButton && (
+        <View style={styles.endContainer}>
+          <Text style={{ color: "grey", fontSize: 15, textAlign: "center" }}>
+            Don't want to answer these questions? No worries! Click on the
+            button below to see your home page.
+          </Text>
+          <TouchableOpacity
+            style={styles.regularButton}
+            onPress={() => router.push("/(tabs)/home")}
+          >
+            <Text style={{ color: "white", fontSize: 10 }}>Go Home</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
