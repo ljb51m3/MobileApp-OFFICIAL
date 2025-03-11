@@ -329,7 +329,17 @@ const eventTypeStyles = {
       setShowEventModal(false);
       Alert.alert("Success", "Event added successfully!");
 
-      // Refresh events from ALL calendars
+      // Refresh events immediately
+      await refreshEvents();
+    } catch (error) {
+      setErrorMessage("Failed to add event");
+      setShowErrorModal(true);
+    }
+  };
+
+  // Add a function to refresh events
+  const refreshEvents = async () => {
+    try {
       const allCalendars = await ExpoCalendar.getCalendarsAsync(
         ExpoCalendar.EntityTypes.EVENT
       );
@@ -345,8 +355,7 @@ const eventTypeStyles = {
       );
       setEvents(updatedEvents as any);
     } catch (error) {
-      setErrorMessage("Failed to add event");
-      setShowErrorModal(true);
+      console.error('Error refreshing events:', error);
     }
   };
 
@@ -355,26 +364,11 @@ const eventTypeStyles = {
     setShowTimePickerModal(true);
   };
 
-  // Add function to delete event
+  // Update the deleteEvent function to use refreshEvents
   const deleteEvent = async (eventId: string) => {
     try {
       await ExpoCalendar.deleteEventAsync(eventId);
-
-      // Refresh events list after deletion
-      const calendars = await ExpoCalendar.getCalendarsAsync(
-        ExpoCalendar.EntityTypes.EVENT
-      );
-      const writableCalendars = calendars.filter(
-        (calendar) => calendar.allowsModifications
-      );
-      const calendarIds = writableCalendars.map((calendar) => calendar.id);
-
-      const updatedEvents = await ExpoCalendar.getEventsAsync(
-        calendarIds,
-        new Date(),
-        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-      );
-      setEvents(updatedEvents as any);
+      await refreshEvents(); // Refresh events after deletion
       Alert.alert("Success", "Event deleted successfully!");
     } catch (error) {
       Alert.alert("Error", "Failed to delete event");

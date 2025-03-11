@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Calendar as CalendarView } from "react-native-calendars";
 import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
+import { useIsFocused } from '@react-navigation/native';
 
 // Add type definitions at the top
 type DayMarking = {
@@ -114,7 +115,9 @@ export default function HomeScreen() {
   ];
 
   const [randomFact, setRandomFact] = useState<string>("");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<ExpoCalendar.Event[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const isFocused = useIsFocused();
 
   //Checklist
   const [checklist, setChecklist] = useState([
@@ -124,9 +127,6 @@ export default function HomeScreen() {
     { id: 4, task: "Exercise for 30 minutes", completed: false },
     { id: 5, task: "Eat a healthy meal", completed: false },
   ]);
-
-  // Add selectedDate state with other state declarations
-  const [selectedDate, setSelectedDate] = useState<string>("");
 
   // Get Name from AsyncStorage
   useEffect(() => {
@@ -153,19 +153,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Get Time
-  /*
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const time = new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      });
-      setCurrentTime(time);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-  */
   // Select random fact from array
   useEffect(() => {
     const fact =
@@ -173,26 +160,30 @@ export default function HomeScreen() {
     setRandomFact(fact);
   }, []);
 
-  // Get events from calendar
+  // Function to fetch events
+  const fetchEvents = async () => {
+    try {
+      const calendars = await ExpoCalendar.getCalendarsAsync(ExpoCalendar.EntityTypes.EVENT);
+      const writableCalendars = calendars.filter(calendar => calendar.allowsModifications);
+      const calendarIds = writableCalendars.map(calendar => calendar.id);
+      
+      const fetchedEvents = await ExpoCalendar.getEventsAsync(
+        calendarIds,
+        new Date(),
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      );
+      setEvents(fetchedEvents as any);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  // Fetch events when the component mounts and when it comes into focus
   useEffect(() => {
-    (async () => {
-      const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
-      if (status === "granted") {
-        const calendars = await ExpoCalendar.getCalendarsAsync(
-          ExpoCalendar.EntityTypes.EVENT
-        );
-        if (calendars.length > 0) {
-          const calendarIds = calendars.map((calendar) => calendar.id);
-          const events = await ExpoCalendar.getEventsAsync(
-            calendarIds,
-            new Date(),
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
-          );
-          setEvents(events);
-        }
-      }
-    })();
-  }, []);
+    if (isFocused) {
+      fetchEvents();
+    }
+  }, [isFocused]);
 
   //Toggle Task Completion
   const toggleTaskCompletion = (id: number) => {
