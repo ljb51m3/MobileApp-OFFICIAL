@@ -11,23 +11,20 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
-  TextInput,
   Image,
   ScrollView,
   Switch,
+  Animated,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Calendar as CalendarView } from "react-native-calendars";
 import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
+import {getAppleFirstName} from "../auth/appleauth";
+import {LinearGradient} from "expo-linear-gradient";
 
 export default function HomeScreen() {
-  //const [currentTime, setCurrentTime] = useState<string>(
-  // new Date().toLocaleTimeString()
-  //);
-  const [name, setName] = useState<string>("");
-  const [isNameSet, setIsNameSet] = useState<boolean>(false);
+  const [name, setName] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const diabetesFacts = [
     "Less than 50% of patients with diabetes regularly schedule eye exams.",
     "Diabetes is the leading cause of kidney failure in the United States.",
@@ -44,51 +41,30 @@ export default function HomeScreen() {
 
   //Checklist
   const [checklist, setChecklist] = useState([
-    { id: 1, task: "Schedule eye exam", completed: false },
-    { id: 2, task: "Check blood sugar levels", completed: false },
-    { id: 3, task: "Take prescribed medication", completed: false },
-    { id: 4, task: "Exercise for 30 minutes", completed: false },
-    { id: 5, task: "Eat a healthy meal", completed: false },
+    { id: 1, task: "Schedule eye exam", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
+    { id: 2, task: "Check blood sugar levels", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
+    { id: 3, task: "Take prescribed medication", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
+    { id: 4, task: "Exercise for 30 minutes", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
+    { id: 5, task: "Eat a healthy meal", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
   ]);
 
-  // Get Name from AsyncStorage
+  // Get Name from AppleID
   useEffect(() => {
-    const getStoredName = async () => {
+    const fetchAppleUserName = async () => {
+      setIsLoading(true);
       try {
-        const storedName = await AsyncStorage.getItem("userName");
-        if (storedName) {
-          setName(storedName);
-          setIsNameSet(true);
-        }
+        const retrievedName = await getAppleFirstName();
+        setName(retrievedName ?? null);
       } catch (error) {
-        console.error("Failed to load name", error);
+        console.error("Error fetching Apple ID name:", error);
+        setName(null);
       }
+      setIsLoading(false);
     };
-    getStoredName();
+
+    fetchAppleUserName();
   }, []);
 
-  const saveName = async () => {
-    try {
-      await AsyncStorage.setItem("userName", name);
-      setIsNameSet(true);
-    } catch (error) {
-      console.error("Failed to save name", error);
-    }
-  };
-
-  // Get Time
-  /*
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const time = new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      });
-      setCurrentTime(time);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-  */
   // Select random fact from array
   useEffect(() => {
     const fact =
@@ -121,10 +97,29 @@ export default function HomeScreen() {
   const toggleTaskCompletion = (id: number) => {
     setChecklist((prevChecklist) =>
       prevChecklist.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
+        item.id === id ? { ...item, completed: true } : item
       )
     );
+  
+    const itemToAnimate = checklist.find((item) => item.id === id);
+    if (itemToAnimate) {
+      Animated.parallel([
+        Animated.timing(itemToAnimate.fadeAnim, {
+          toValue: 0, // Fade out
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(itemToAnimate.translateX, {
+          toValue: 100, // Slide right
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setChecklist((prevChecklist) => prevChecklist.filter((i) => i.id !== id));
+      });
+    }
   };
+  
 
   // Add the isAppCreatedEvent function
   const isAppCreatedEvent = (event: ExpoCalendar.Event) => {
@@ -142,19 +137,12 @@ export default function HomeScreen() {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <Text style={styles.welcomeText}>Welcome!</Text>
-        {/* Name below Welcome! */}
-        {!isNameSet ? (
-          <>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Enter your name"
-              value={name}
-              onChangeText={setName}
-            />
-            <Button title="Save Name" onPress={saveName} />
-          </>
-        ) : (
+        {isLoading ? (
+          <Text style={styles.loadingText}>Fetching Apple ID...</Text>
+        ) : name ? (
           <Text style={styles.nameText}>{name}</Text>
+        ) : (
+          <Text style={styles.nameText}>Guest</Text>
         )}
 
         {/* Welcome message */}
@@ -162,33 +150,29 @@ export default function HomeScreen() {
 
         {/* Fun Fact Section */}
         <View style={styles.factContainer}>
-          <Image
-            source={require("../../assets/images/eye.png")}
-            style={styles.image}
-          />
-          <View style={[styles.bubble, { marginLeft: 30 }]}>
-            <Text style={styles.bubbleText}>Did you know: {randomFact}</Text>
-          </View>
+          <Image source={require("../../assets/images/eye.png")} style={styles.image} />
+          <LinearGradient colors={["#cce5ff", "#e6f2ff"]} style={styles.factBubble}>
+            <Text style={styles.factTitle}>💡 Did you know?</Text>
+            <Text style={styles.factText}>{randomFact}</Text>
+          </LinearGradient>
         </View>
 
         {/*Checklist Section*/}
         <View style={styles.checklistContainer}>
           <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
           {checklist.map((item) => (
-            <View key={item.id} style={styles.checklistItem}>
-              <Switch
-                value={item.completed}
-                onValueChange={() => toggleTaskCompletion(item.id)}
-              />
-              <Text
-                style={[
-                  styles.checklistText,
-                  item.completed && styles.completedTask,
-                ]}
-              >
-                {item.task}
-              </Text>
-            </View>
+            <Animated.View
+              key={item.id}
+              style={{
+                opacity: item.fadeAnim,
+                transform: [{ translateX: item.translateX }],
+              }}
+            >
+              <View style={styles.checklistItem}>
+                <Switch value={item.completed} onValueChange={() => toggleTaskCompletion(item.id)} />
+                <Text style={styles.checklistText}>{item.task}</Text>
+              </View>
+            </Animated.View>
           ))}
         </View>
 
@@ -278,15 +262,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     paddingTop: 10,
-    paddingBottom: 60,
     paddingLeft: 10,
   },
-  /*
-  time: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "black",
-  },*/
   welcomeText: {
     fontSize: 30,
     fontWeight: "bold",
@@ -310,6 +287,12 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     fontWeight: "bold",
   },
+  loadingText: {
+    fontSize: 18,
+    marginTop: 10,
+    color: "gray",
+    marginLeft: 20,
+  },
   welcomeMessage: {
     fontSize: 15,
     marginTop: 10,
@@ -324,15 +307,15 @@ const styles = StyleSheet.create({
   },
   factContainer: {
     flexDirection: "row",
-    marginTop: 20,
-    alignItems: "flex-start",
-    marginLeft: 10,
+    alignItems: "center",
+    marginVertical: 20,
+    paddingHorizontal: 10,
   },
-  bubble: {
-    padding: 10,
-    backgroundColor: "#f0f8ff",
-    borderRadius: 10,
-    maxWidth: "50%",
+  factBubble: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 15,
+    marginLeft: 10,
     borderWidth: 2,
     borderColor: "#5e81c2",
     shadowColor: "#000",
@@ -340,8 +323,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
-  bubbleText: {
-    fontSize: 15,
+  factTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2E66E7",
+    marginBottom: 5,
+  },
+  factText: {
+    fontSize: 16,
     color: "#333",
     fontStyle: "italic",
   },
@@ -349,10 +338,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginLeft: 10,
     marginRight: 10,
-    marginBottom: 20,
+    marginBottom: 75,
   },
   calendar: {
-    width: 335,
+    width: 375,
     borderWidth: 1,
     borderColor: "#ddd",
   },
@@ -372,32 +361,27 @@ const styles = StyleSheet.create({
   checklistItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 5,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginVertical: 6,
+    shadowColor: "#000",
     backgroundColor: "#e0f7fa",
-    width: "100%",
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   checklistText: {
     fontSize: 16,
-    color: "black",
-    marginLeft: 10,
+    color: "#333",
+    fontWeight: "500",
   },
   completedTask: {
-    color: "#a9a9a9",
+    color: "#9E9E9E",
   },
   scrollContainer: {
     paddingBottom: 20,
   },
 });
-
-/*
-
-return (time stuff)
-<Text style={styles.time}>{currentTime}</Text>
-
-
-
-*/
