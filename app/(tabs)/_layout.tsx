@@ -1,12 +1,6 @@
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-  TouchableOpacity,
-} from "react-native";
+import { View, Platform, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -80,7 +74,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="linking"
         options={{
-          title: "My Health",
+          title: "MyHealth",
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="notes-medical" size={24} color={color} />
           ),
@@ -96,14 +90,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-      name="Mascot"
-      options={{
-        title: "Mascot",
-        tabBarIcon: ({ color }) => (
-          <Feather name="eye" size={24} color={color} />
-        ),
-      }}
-    />
-  </Tabs>
+        name="Mascot"
+        options={{
+          title: "Mascot",
+          tabBarIcon: ({ color }) => (
+            <Feather name="eye" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Tracker"
+        options={{
+          title: "Track Your Health",
+          tabBarIcon: ({ color }) => (
+            <Feather name="book" size={24} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }

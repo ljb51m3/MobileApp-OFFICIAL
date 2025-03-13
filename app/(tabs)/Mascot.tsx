@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from "react-native";
 import ClaimPointsModal from "../../components/ClaimPointsModal";
 
 const MascotPage = () => {
@@ -36,7 +43,7 @@ const MascotPage = () => {
           source={require("../../assets/images/Mascot.jpg")}
           style={styles.petImage}
         />
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
           <View style={styles.tasksContainer}>
             {tasks.map((task) => (
               <View key={task.id} style={styles.taskItem}>
@@ -58,7 +65,7 @@ const MascotPage = () => {
             task={selectedTask ? selectedTask.text : ""}
             points={selectedTask ? selectedTask.points : 0}
           />
-        </View>
+        </ScrollView>
       </>
     </>
   );

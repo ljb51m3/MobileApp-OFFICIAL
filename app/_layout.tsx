@@ -40,6 +40,10 @@ export default function RootLayout() {
       <Stack.Screen name="welcome/login" options={{ title: "Sign In" }} />
       <Stack.Screen name="welcome/signup" options={{ title: "Sign Up" }} />
       <Stack.Screen name="settings" options={{ title: "Settings" }} />
+      <Stack.Screen
+        name="welcome/survey"
+        options={{ headerShown: false, title: "" }}
+      />
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "" }} />
       <Stack.Screen name="logout" options={{ headerShown: false, title: "" }} />
       <Stack.Screen name="+not-found" />

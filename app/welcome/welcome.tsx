@@ -10,10 +10,51 @@ import * as React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const [isNew, setIsNew] = useState<boolean | null>(null);
 
+  useEffect(() => {
+    const checkIsNew = async () => {
+      try {
+        // await AsyncStorage.removeItem("hasVisited"); // for debugging purposes
+        const hasVisited = await AsyncStorage.getItem("hasVisited");
+        //console.log("has visited?", hasVisited);
+        //console.log("isNew?", isNew);
+        if (hasVisited === null) {
+          await AsyncStorage.setItem("hasVisited", "true");
+          setIsNew(true);
+        } else {
+          //console.log("hasVisited != null");
+          setIsNew(false);
+        }
+      } catch (e) {
+        console.error("error checking isNew", e);
+      }
+    };
+
+    // Ensure the check is only done once on mount
+    checkIsNew();
+  }, []); // Empty array ensures this only runs once
+
+  useEffect(() => {
+    if (isNew === true) {
+      console.log("pushed to survey");
+      router.push("/welcome/survey");
+    }
+  }, [isNew, router]);
+
+  if (isNew === null) {
+    console.log("loading");
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <LinearGradient
