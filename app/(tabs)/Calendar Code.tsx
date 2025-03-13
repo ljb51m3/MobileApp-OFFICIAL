@@ -641,24 +641,58 @@ const eventTypeStyles = {
 
           <Calendar
             onDayPress={(day: { dateString: string }) => {
-              setSelectedDate(day.dateString);  // Remove the follow-up handling from main calendar
+              setSelectedDate(day.dateString);
             }}
             markedDates={{
               ...Object.fromEntries(
-                events.map((event: ExpoCalendar.Event) => {
-                  const eventDate = new Date(event.startDate);
-                  const date = eventDate.toISOString().split('T')[0];
-                  const { classification } = parseEventDetails(event);
-                  const eventStyle = classification ? eventTypeStyles[classification as keyof typeof eventTypeStyles] : undefined;
-                  
-                  return [date, {
-                    marked: true,
-                    selected: date === selectedDate,
-                    selectedColor: eventStyle?.color || '#2E66E7',
-                    dotColor: eventStyle?.color || '#666666',
-                  }];
-                })
-              )
+                events
+                  .filter(event => isAppCreatedEvent(event)) // Only include app-created events
+                  .map((event: ExpoCalendar.Event) => {
+                    const eventDate = new Date(event.startDate);
+                    const date = eventDate.toISOString().split('T')[0];
+                    const { classification } = parseEventDetails(event);
+                    const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
+                    
+                    return [date, {
+                      selected: date === selectedDate,
+                      selectedColor: date === selectedDate ? '#2E66E7' : undefined,
+                      marked: true,
+                      startingDay: true,
+                      endingDay: true,
+                      color: eventStyle?.color || '#666666',
+                      textColor: 'white',
+                    }];
+                  })
+              ),
+              ...(selectedDate ? {
+                [selectedDate]: {
+                  selected: true,
+                  selectedColor: '#2E66E7',
+                  marked: (() => {
+                    // Only mark if there's an app-created event on this date
+                    const event = events.find((event: ExpoCalendar.Event) => {
+                      const eventDate = new Date(event.startDate);
+                      return eventDate.toISOString().split('T')[0] === selectedDate && isAppCreatedEvent(event);
+                    });
+                    return !!event;
+                  })(),
+                  startingDay: true,
+                  endingDay: true,
+                  color: (() => {
+                    const event = events.find((event: ExpoCalendar.Event) => {
+                      const eventDate = new Date(event.startDate);
+                      return eventDate.toISOString().split('T')[0] === selectedDate && isAppCreatedEvent(event);
+                    });
+                    if (event) {
+                      const { classification } = parseEventDetails(event);
+                      const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
+                      return eventStyle?.color || '#666666';
+                    }
+                    return '#2E66E7';
+                  })(),
+                  textColor: 'white',
+                },
+              } : {}),
             }}
             theme={{
               backgroundColor: '#ffffff',
@@ -668,8 +702,6 @@ const eventTypeStyles = {
               todayTextColor: '#2E66E7',
               dayTextColor: '#2d4150',
               textDisabledColor: '#d9e1e8',
-              dotColor: '#666666',
-              selectedDotColor: '#FFFFFF',
               arrowColor: '#2E66E7',
               monthTextColor: '#2d4150',
               textDayFontSize: 16,
@@ -685,6 +717,7 @@ const eventTypeStyles = {
               borderWidth: 1,
               borderColor: '#E5E5E5',
             }}
+            markingType="period"
           />
 
           {selectedDate && (
@@ -1158,15 +1191,21 @@ const eventTypeStyles = {
               <View style={{ marginBottom: 10 }}>
                 <Text style={{ marginBottom: 5 }}>Date</Text>
                 <TouchableOpacity
-                  onPress={() => setShowDatePickerModal(true)}
+                  onPress={() => {
+                    setShowDatePickerModal(true);
+                    setIsFollowUpScheduling(false); // Ensure we're not in follow-up mode
+                  }}
                   style={{
                     borderWidth: 1,
                     borderColor: "#ddd",
                     padding: 15,
                     borderRadius: 5,
+                    backgroundColor: '#f8f9fa',
                   }}
                 >
-                  <Text>{formatDate(selectedEventDate)}</Text>
+                  <Text style={{ color: '#2d4150', fontSize: 16 }}>
+                    📅 {formatDate(selectedEventDate)}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -1491,10 +1530,7 @@ const eventTypeStyles = {
                 visible={showReminderModal}
                 animationType="slide"
                 transparent={true}
-                onRequestClose={() => {
-                  setShowReminderModal(false);
-                  setIsFollowUpScheduling(false);
-                }}
+                onRequestClose={() => setShowReminderModal(false)}
               >
                 <View style={{
                   flex: 1,
@@ -1525,7 +1561,7 @@ const eventTypeStyles = {
                       textAlign: "center",
                       color: '#2d4150'
                     }}>
-                      Schedule Follow-up Reminder
+                      Set Event Reminders
                     </Text>
 
                     <Text style={{
@@ -1535,90 +1571,66 @@ const eventTypeStyles = {
                       textAlign: 'center',
                       lineHeight: 24,
                     }}>
-                      Choose the date of your initial appointment to schedule a follow-up reminder in 6 months
+                      Select when you would like to be reminded about this event
                     </Text>
 
-                    <View style={{ marginBottom: 20 }}>
-                      <Text style={{ marginBottom: 10, color: '#2d4150', fontWeight: '600' }}>Initial Appointment Date</Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowDatePickerModal(true);
-                        }}
-                        style={{
-                          borderWidth: 1,
-                          borderColor: "#50C878",
-                          padding: 15,
-                          borderRadius: 5,
-                          backgroundColor: '#f8f9fa',
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text style={{ color: '#2d4150', fontSize: 16 }}>📅 {formatDate(selectedEventDate)}</Text>
-                      </TouchableOpacity>
-                    </View>
+                    <ScrollView style={{ maxHeight: 300 }}>
+                      {alertOptions.map((option) => (
+                        <TouchableOpacity
+                          key={option.value}
+                          onPress={() => toggleAlert(option.value)}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            padding: 15,
+                            borderBottomWidth: 1,
+                            borderBottomColor: "#eee",
+                            backgroundColor: selectedAlerts.includes(option.value) ? '#f0f8ff' : 'white',
+                          }}
+                        >
+                          <View style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: 12,
+                            borderWidth: 2,
+                            borderColor: "#2E66E7",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginRight: 15,
+                          }}>
+                            {selectedAlerts.includes(option.value) && (
+                              <View style={{
+                                width: 12,
+                                height: 12,
+                                borderRadius: 6,
+                                backgroundColor: "#2E66E7",
+                              }} />
+                            )}
+                          </View>
+                          <Text style={{ 
+                            fontSize: 16,
+                            color: selectedAlerts.includes(option.value) ? '#2E66E7' : '#333',
+                          }}>
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
 
-                    <View style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginTop: 20,
-                    }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowReminderModal(false);
-                          setIsFollowUpScheduling(false);
-                        }}
-                        style={{
-                          backgroundColor: "#f8f9fa",
-                          paddingVertical: 16,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
-                          flex: 1,
-                          marginRight: 10,
-                          borderWidth: 1,
-                          borderColor: "#dee2e6",
-                        }}
-                      >
-                        <Text style={{
-                          color: "#495057",
-                          fontSize: 16,
-                          textAlign: "center",
-                          fontWeight: "600",
-                        }}>
-                          Cancel
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => handleDateSelection(selectedEventDate)}
-                        style={{
-                          backgroundColor: "#50C878",
-                          paddingVertical: 16,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
-                          flex: 1,
-                          marginLeft: 10,
-                          elevation: 2,
-                          shadowColor: "#000",
-                          shadowOffset: {
-                            width: 0,
-                            height: 1,
-                          },
-                          shadowOpacity: 0.2,
-                          shadowRadius: 1.41,
-                        }}
-                      >
-                        <Text style={{
-                          color: "white",
-                          fontSize: 16,
-                          textAlign: "center",
-                          fontWeight: "600",
-                        }}>
-                          Schedule Reminder
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                      onPress={() => setShowReminderModal(false)}
+                      style={{
+                        backgroundColor: "#2E66E7",
+                        padding: 15,
+                        borderRadius: 8,
+                        marginTop: 20,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                        Confirm Reminders
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </Modal>
@@ -1720,6 +1732,92 @@ const eventTypeStyles = {
                     </TouchableOpacity>
                   </View>
                 </View>
+              </Modal>
+
+              {/* Date Picker Modal for New Event */}
+              <Modal
+                visible={showDatePickerModal && !isFollowUpScheduling}
+                animationType="none"
+                transparent={true}
+                statusBarTranslucent={true}
+              >
+                <Pressable 
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => setShowDatePickerModal(false)}
+                >
+                  <Pressable 
+                    style={{
+                      backgroundColor: "white",
+                      width: '90%',
+                      padding: 20,
+                      borderRadius: 10,
+                      maxHeight: '90%',
+                      shadowColor: "#000",
+                      shadowOffset: {
+                        width: 0,
+                        height: 2,
+                      },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                    }}
+                    onPress={(e) => e.stopPropagation()}
+                  >
+                    <Text style={{
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      marginBottom: 10,
+                      textAlign: "center",
+                      color: '#2E66E7'
+                    }}>
+                      Select Event Date
+                    </Text>
+
+                    <Calendar
+                      current={selectedEventDate}
+                      onDayPress={(day: { dateString: string }) => {
+                        setSelectedEventDate(day.dateString);
+                        setShowDatePickerModal(false);
+                      }}
+                      markedDates={{
+                        [selectedEventDate]: {
+                          selected: true,
+                          selectedColor: '#2E66E7',
+                        },
+                      }}
+                      style={{
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderColor: '#E5E5E5',
+                        marginBottom: 20,
+                      }}
+                      theme={{
+                        backgroundColor: '#ffffff',
+                        calendarBackground: '#ffffff',
+                        selectedDayBackgroundColor: '#2E66E7',
+                        selectedDayTextColor: '#ffffff',
+                        todayTextColor: '#2E66E7',
+                        dayTextColor: '#2d4150',
+                        textDisabledColor: '#d9e1e8',
+                        dotColor: '#2E66E7',
+                        selectedDotColor: '#ffffff',
+                        arrowColor: '#2E66E7',
+                        monthTextColor: '#2d4150',
+                        textDayFontSize: 16,
+                        textMonthFontSize: 18,
+                        textDayHeaderFontSize: 14
+                      }}
+                    />
+                  </Pressable>
+                </Pressable>
               </Modal>
             </View>
           </View>
