@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,40 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+  addDoc,
+} from "firebase/firestore";
+import { db, auth } from "../(tabs)/Firebase/Firebase";
+import { format } from "date-fns";
 
-const Tracker = () => {
-  const [sleep, setSleep] = useState("");
-  const [eating, setEating] = useState("");
-  const [exercise, setExercise] = useState("");
+interface Log {
+  id: string;
+  userId: string;
+  sleep: string;
+  eating: string;
+  exercise: string;
+  date?: Date;
+  timestamp?: Date;
+}
 
-  const [modalVisible, setModalVisible] = useState(false);
+const Tracker: React.FC = () => {
+  const [sleep, setSleep] = useState<string>("");
+  const [eating, setEating] = useState<string>("");
+  const [exercise, setExercise] = useState<string>("");
+  const [todayLog, setTodayLog] = useState<Log | null>(null);
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [currentLogIndex, setCurrentLogIndex] = useState<number>(0);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  const handleTrackerSelection = (category: string, value: any) => {
+  const handleTrackerSelection = (category: string, value: string) => {
     switch (category) {
       case "sleep":
         setSleep(value);
@@ -30,6 +53,65 @@ const Tracker = () => {
       default:
         break;
     }
+  };
+
+  const saveLog = async () => {
+    try {
+      if (!auth.currentUser) {
+        alert("Please sign in to save your log.");
+        return;
+      }
+
+      await addDoc(collection(db, "logs"), {
+        userId: auth.currentUser.uid,
+        sleep,
+        eating,
+        exercise,
+        date: new Date().toISOString().split("T")[0],
+        timestamp: new Date(),
+      });
+
+      alert("Log saved successfully!");
+    } catch (error) {
+      console.error("Error saving log:", error);
+      alert("Failed to save log");
+    }
+  };
+
+  useEffect(() => {
+    if (!auth.currentUser) return;
+
+    const logsRef = collection(db, "logs");
+    const q = query(
+      logsRef,
+      where("userId", "==", auth.currentUser.uid),
+      orderBy("timestamp", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const logsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        date: doc.data().timestamp?.toDate(),
+      })) as Log[];
+      setLogs(logsData);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const goToPreviousLog = () => {
+    setCurrentLogIndex((prev) => (prev > 0 ? prev - 1 : logs.length - 1));
+  };
+
+  const goToNextLog = () => {
+    setCurrentLogIndex((prev) => (prev < logs.length - 1 ? prev + 1 : 0));
+  };
+
+  const currentLog = logs[currentLogIndex] || {};
+
+  const formatDate = (date?: Date) => {
+    return date ? format(date, "MMMM do, yyyy") : "No date";
   };
 
   return (
@@ -90,11 +172,22 @@ const Tracker = () => {
         </View>
       </View>
 
+      <TouchableOpacity style={styles.saveButton} onPress={saveLog}>
+        <Text style={styles.saveButtonText}>
+          {todayLog ? "Update Log" : "Save Log"}
+        </Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.bookIcon}
         onPress={() => setModalVisible(true)}
       >
         <Ionicons name="book" size={32} color="#095da7" />
+        {logs.length > 0 && (
+          <View style={styles.logCountBadge}>
+            <Text style={styles.logCountText}>{logs.length}</Text>
+          </View>
+        )}
       </TouchableOpacity>
 
       <Modal
@@ -105,12 +198,42 @@ const Tracker = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Today's Log</Text>
-            <Text>Sleep: {sleep || "Not logged"}</Text>
-            <Text></Text>
-            <Text>Eating: {eating || "Not logged"}</Text>
-            <Text></Text>
-            <Text>Exercise: {exercise || "Not logged"}</Text>
+            <View style={styles.navigationContainer}>
+              <TouchableOpacity onPress={goToPreviousLog}>
+                <Ionicons name="chevron-back" size={28} color="#095da7" />
+              </TouchableOpacity>
+
+              <Text style={styles.modalTitle}>
+                {formatDate(currentLog.date)}
+              </Text>
+
+              <TouchableOpacity onPress={goToNextLog}>
+                <Ionicons name="chevron-forward" size={28} color="#095da7" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.logContent}>
+              <Text style={styles.logLabel}>Sleep:</Text>
+              <Text style={styles.logValue}>
+                {currentLog.sleep || "Not logged"}
+              </Text>
+
+              <Text style={styles.logLabel}>Eating:</Text>
+              <Text style={styles.logValue}>
+                {currentLog.eating || "Not logged"}
+              </Text>
+
+              <Text style={styles.logLabel}>Exercise:</Text>
+              <Text style={styles.logValue}>
+                {currentLog.exercise || "Not logged"}
+              </Text>
+            </View>
+
+            <Text style={styles.logCounter}>
+              {logs.length > 0
+                ? `${currentLogIndex + 1} of ${logs.length}`
+                : "No logs yet"}
+            </Text>
 
             <Pressable
               style={styles.closeButton}
@@ -214,6 +337,63 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  saveButton: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#095da7",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  navigationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+  logContent: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  logLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 10,
+  },
+  logValue: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 5,
+    paddingLeft: 10,
+  },
+  logCounter: {
+    fontSize: 14,
+    color: "#888",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  logCountBadge: {
+    position: "absolute",
+    right: -5,
+    top: -5,
+    backgroundColor: "#ff4757",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logCountText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
   },
 });
