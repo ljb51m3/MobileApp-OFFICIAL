@@ -645,60 +645,69 @@ const eventTypeStyles = {
             }}
             markedDates={{
               ...Object.fromEntries(
-                events
-                  .filter(event => isAppCreatedEvent(event)) // Only include app-created events
-                  .map((event: ExpoCalendar.Event) => {
+                Object.entries(
+                  events.reduce((acc: { [key: string]: ExpoCalendar.Event[] }, event: ExpoCalendar.Event) => {
                     const eventDate = new Date(event.startDate);
                     const date = eventDate.toISOString().split('T')[0];
-                    const { classification } = parseEventDetails(event);
+                    if (!acc[date]) {
+                      acc[date] = [];
+                    }
+                    acc[date].push(event);
+                    return acc;
+                  }, {})
+                ).map(([date, dateEvents]) => {
+                  const isSelected = date === selectedDate;
+                  
+                  // Check if there's an app-created event for this date
+                  const appEvent = dateEvents.find(event => isAppCreatedEvent(event));
+                  
+                  if (appEvent) {
+                    // If there's an app event, use its styling
+                    const { classification } = parseEventDetails(appEvent);
                     const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
                     
                     return [date, {
-                      selected: date === selectedDate,
-                      selectedColor: date === selectedDate ? '#2E66E7' : undefined,
                       marked: true,
-                      startingDay: true,
-                      endingDay: true,
-                      color: eventStyle?.color || '#666666',
-                      textColor: 'white',
+                      selected: isSelected,
+                      customStyles: {
+                        container: {
+                          backgroundColor: isSelected ? '#2E66E7' : 'transparent',
+                          borderWidth: 2,
+                          borderColor: eventStyle?.color || '#2E66E7',
+                          borderRadius: 20
+                        },
+                        text: {
+                          color: isSelected ? 'white' : (eventStyle?.color || '#2E66E7'),
+                          fontWeight: 'bold'
+                        }
+                      }
                     }];
-                  })
+                  } else {
+                    // If no app event, use regular styling
+                    return [date, {
+                      marked: true,
+                      selected: isSelected,
+                      selectedColor: '#2E66E7',
+                      dotColor: '#666666'
+                    }];
+                  }
+                })
               ),
-              ...(selectedDate ? {
+              ...(selectedDate && !events.some((event: ExpoCalendar.Event) => {
+                const eventDate = new Date(event.startDate);
+                return eventDate.toISOString().split('T')[0] === selectedDate;
+              }) ? {
                 [selectedDate]: {
                   selected: true,
-                  selectedColor: '#2E66E7',
-                  marked: (() => {
-                    // Only mark if there's an app-created event on this date
-                    const event = events.find((event: ExpoCalendar.Event) => {
-                      const eventDate = new Date(event.startDate);
-                      return eventDate.toISOString().split('T')[0] === selectedDate && isAppCreatedEvent(event);
-                    });
-                    return !!event;
-                  })(),
-                  startingDay: true,
-                  endingDay: true,
-                  color: (() => {
-                    const event = events.find((event: ExpoCalendar.Event) => {
-                      const eventDate = new Date(event.startDate);
-                      return eventDate.toISOString().split('T')[0] === selectedDate && isAppCreatedEvent(event);
-                    });
-                    if (event) {
-                      const { classification } = parseEventDetails(event);
-                      const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
-                      return eventStyle?.color || '#666666';
-                    }
-                    return '#2E66E7';
-                  })(),
-                  textColor: 'white',
-                },
-              } : {}),
+                  selectedColor: '#2E66E7'
+                }
+              } : {})
             }}
             theme={{
               backgroundColor: '#ffffff',
               calendarBackground: '#ffffff',
-              selectedDayBackgroundColor: '#2E66E7',
-              selectedDayTextColor: '#FFFFFF',
+              textSectionTitleColor: '#2d4150',
+              selectedDayTextColor: '#ffffff',
               todayTextColor: '#2E66E7',
               dayTextColor: '#2d4150',
               textDisabledColor: '#d9e1e8',
@@ -707,7 +716,6 @@ const eventTypeStyles = {
               textDayFontSize: 16,
               textMonthFontSize: 18,
               textDayHeaderFontSize: 16,
-              textSectionTitleColor: '#2d4150',
               textDayFontWeight: '600',
               textMonthFontWeight: 'bold',
               textDayHeaderFontWeight: '600'
@@ -715,9 +723,9 @@ const eventTypeStyles = {
             style={{
               height: 370,
               borderWidth: 1,
-              borderColor: '#E5E5E5',
+              borderColor: '#E5E5E5'
             }}
-            markingType="period"
+            markingType="custom"
           />
 
           {selectedDate && (
