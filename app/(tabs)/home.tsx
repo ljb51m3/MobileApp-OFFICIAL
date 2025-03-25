@@ -26,14 +26,18 @@ export default function HomeScreen() {
   const [name, setName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const diabetesFacts = [
-    "Less than 50% of patients with diabetes regularly schedule eye exams.",
-    "Diabetes is the leading cause of kidney failure in the United States.",
-    "Over 30 million people in the U.S. have diabetes, but about 1 in 4 don’t know they have it.",
-    "People with diabetes are at a higher risk for heart disease and stroke.",
-    "Diabetes can increase the risk of blindness, nerve damage, and amputations.",
-    "Approximately 90-95% of people with diabetes have Type 2 diabetes.",
-    "Managing blood sugar levels can significantly reduce the risk of diabetes-related complications.",
-    "Diabetes is the 7th leading cause of death in the United States.",
+    "Less than 50% of patients with diabetes regularly schedule eye exams",
+    "Over 37 million Americans have diabetes, but about 1 in 5 don’t know they have it",
+    "Approximately 90-95% of people with diabetes have Type 2 diabetes",
+    "Managing blood sugar levels can significantly reduce the risk of diabetes-related complications",
+    "Exercise helps regulate blood sugar by making your body more sensitive to insulin",
+    "Eating fiber-rich foods like vegetables, beans, and whole grains can help manage blood sugar levels",
+    "Poor sleep can lead to higher blood sugar levels and increased insulin resistance",
+    "Drinking enough water helps your kidneys flush out excess blood sugar",
+    "Stress can raise blood sugar levels due to increased cortisol and adrenaline production",
+    "Short walks after meals can help lower post-meal blood sugar spikes",
+    "Standing up every 30 minutes can help improve insulin sensitivity",
+    "Mindfulness and meditation can help regulate blood sugar by reducing stress hormones",
   ];
 
   const [randomFact, setRandomFact] = useState<string>("");
@@ -47,6 +51,9 @@ export default function HomeScreen() {
     { id: 4, task: "Exercise for 30 minutes", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
     { id: 5, task: "Eat a healthy meal", completed: false, fadeAnim: new Animated.Value(1), translateX: new Animated.Value(0) },
   ]);
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedEvents, setSelectedEvents] = useState<Event[]>([]);
 
   // Get Name from AppleID
   useEffect(() => {
@@ -159,7 +166,7 @@ export default function HomeScreen() {
 
         {/*Checklist Section*/}
         <View style={styles.checklistContainer}>
-          <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
+          <Text style={styles.checklistTitle}>To Do List:</Text>
           {checklist.map((item) => (
             <Animated.View
               key={item.id}
@@ -180,8 +187,16 @@ export default function HomeScreen() {
         <View style={styles.calendarContainer}>
           <CalendarView
             onDayPress={(day: any) => {
-              console.log("selected day", day);
+              setSelectedDate(day.dateString);
+              
+              const filteredEvents = events.filter((event) => {
+                const eventDate = event.startDate.toString().split("T")[0];
+                return eventDate === day.dateString;
+              });
+
+              setSelectedEvents(filteredEvents);
             }}
+
             markedDates={events.reduce((acc, event) => {
               const date = event.startDate.toString().split("T")[0];
               const isAppEvent = isAppCreatedEvent(event);
@@ -249,6 +264,28 @@ export default function HomeScreen() {
             }}
             style={styles.calendar}
           />
+        </View>
+        
+        {/*Event Section*/}
+        <View style={styles.eventContainer}>
+          {selectedDate && (
+            <>
+              <Text style={styles.eventTitle}>Events on {selectedDate}:</Text>
+              {selectedEvents.length > 0 ? (
+                selectedEvents.map((event, index) => (
+                  <View key={index} style={styles.eventItem}>
+                    <Text style={styles.eventName}>{event.title}</Text>
+                    <Text style={styles.eventTime}>
+                      {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                      {new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noEvents}>No events scheduled.</Text>
+              )}
+            </>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -338,7 +375,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginLeft: 10,
     marginRight: 10,
-    marginBottom: 75,
+    marginBottom: 25,
   },
   calendar: {
     width: 375,
@@ -382,6 +419,36 @@ const styles = StyleSheet.create({
     color: "#9E9E9E",
   },
   scrollContainer: {
-    paddingBottom: 20,
+    paddingBottom: 50,
+  },
+  eventContainer: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 5,
+    marginBottom: 40,
+    padding: 10,
+  },
+  eventTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  eventItem: {
+    padding: 10,
+    backgroundColor: "#e3f2fd",
+    marginVertical: 5,
+    borderRadius: 8,
+  },
+  eventName: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  eventTime: {
+    fontSize: 14,
+    color: "#555",
+  },
+  noEvents: {
+    fontSize: 14,
+    fontStyle: "italic",
+    color: "#888",
   },
 });
