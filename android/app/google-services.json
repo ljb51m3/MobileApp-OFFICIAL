@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "298967418445",
+    "project_id": "dr-mobile-app",
+    "storage_bucket": "dr-mobile-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298967418445:android:1aae424166a7248d087e04",
+        "android_client_info": {
+          "package_name": "com.BMETeam.DRMobileApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgDn4FqswujEIzHuANMUb-YpX12sE1M7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

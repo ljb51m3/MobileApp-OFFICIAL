@@ -1,5 +1,20 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+  Touchable,
+} from "react-native";
 import { useRouter } from "expo-router";
+
+// import { Collapsible } from "@/components/Collapsible";
+// import { ExternalLink } from "@/components/ExternalLink";
+// import ParallaxScrollView from "@/components/ParallaxScrollView";
+// import { ThemedText } from "@/components/ThemedText";
+// import { ThemedView } from "@/components/ThemedView";
+// import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function LinkingScreen() {
   const router = useRouter();
@@ -38,7 +53,6 @@ export default function LinkingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 50,
     justifyContent: "center",
     alignItems: "center",
     padding: 10,

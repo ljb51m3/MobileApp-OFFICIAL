@@ -40,7 +40,7 @@ const MascotPage = () => {
       </View>
       <>
         <Image
-          source={require("../../assets/images/Mascot.jpg")}
+          source={require("../../assets/images/Eyeball.png")}
           style={styles.petImage}
         />
         <ScrollView style={styles.container}>
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   petImage: {
-    width: 150,
-    height: 150,
+    width: 280,
+    height: 200,
     alignSelf: "center",
     marginTop: 10,
   },

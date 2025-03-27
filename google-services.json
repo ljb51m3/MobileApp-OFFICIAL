@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "298967418445",
+    "firebase_url": "https://dr-mobile-app-default-rtdb.firebaseio.com",
+    "project_id": "dr-mobile-app",
+    "storage_bucket": "dr-mobile-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298967418445:android:1aae424166a7248d087e04",
+        "android_client_info": {
+          "package_name": "com.BMETeam.DRMobileApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "298967418445-o1equ92adn1gq09fmlnqr568v3b7j962.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgDn4FqswujEIzHuANMUb-YpX12sE1M7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "298967418445-o1equ92adn1gq09fmlnqr568v3b7j962.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "298967418445-kd5l5vksm3qs3uadrvsjd68mq57u8eo0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.BMETeam.DRMobileApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298967418445:android:c8473c547a7d5053087e04",
+        "android_client_info": {
+          "package_name": "com.anonymous.testing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "298967418445-o1equ92adn1gq09fmlnqr568v3b7j962.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgDn4FqswujEIzHuANMUb-YpX12sE1M7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "298967418445-o1equ92adn1gq09fmlnqr568v3b7j962.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "298967418445-kd5l5vksm3qs3uadrvsjd68mq57u8eo0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.BMETeam.DRMobileApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

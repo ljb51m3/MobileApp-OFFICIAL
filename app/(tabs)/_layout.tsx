@@ -134,7 +134,16 @@ export default function TabLayout() {
         options={{
           title: "Track Your Health",
           tabBarIcon: ({ color }) => (
-            <Feather name="book" size={32} color={color} />
+            <Feather name="edit" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Education"
+        options={{
+          title: "Learn",
+          tabBarIcon: ({ color }) => (
+            <Feather name="book" size={24} color={color} />
           ),
         }}
       />
