@@ -24,16 +24,47 @@ export default function TabLayout() {
         headerShown: true, // top navigation bar
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        headerTitleStyle: {
+          fontSize: 24,
+          fontWeight: '700',
+          flex: 1,
+          textAlign: 'center',
+        },
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: "absolute",
+            height: 120, // Increased for more space
+            paddingTop: 10,
           },
-          default: {},
+          default: {
+            height: 120, // Increased for more space
+            paddingTop: 10,
+          },
         }),
+        tabBarLabelStyle: {
+          fontSize: 14,
+          fontWeight: '600',
+          marginTop: 12, // Increased space between icon and text
+          paddingBottom: 25, // Increased bottom padding for text
+        },
+        tabBarIconStyle: {
+          marginTop: 15, // Move icons up more
+          height: 32, // Explicit height for icon container
+        },
         headerStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background,
           height: 110,
+        },
+        headerLeftContainerStyle: {
+          paddingLeft: 15,
+        },
+        headerRightContainerStyle: {
+          paddingRight: 15,
+        },
+        headerTitleContainerStyle: {
+          maxWidth: '60%',
+          paddingBottom: 15, // Add padding to lower the title
         },
         headerTintColor: Colors[colorScheme ?? "light"].text,
         headerRight: () => (
@@ -57,7 +88,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="house.fill" color={color} />
+            <IconSymbol size={32} name="house.fill" color={color} />
           ),
         }}
       />
@@ -66,7 +97,7 @@ export default function TabLayout() {
         options={{
           title: "Calendar",
           tabBarIcon: ({ color }) => (
-            <FontAwesome name="calendar-check-o" size={24} color={color} />
+            <FontAwesome name="calendar-check-o" size={32} color={color} />
           ),
         }}
       />
@@ -76,7 +107,7 @@ export default function TabLayout() {
         options={{
           title: "MyHealth",
           tabBarIcon: ({ color }) => (
-            <FontAwesome6 name="notes-medical" size={24} color={color} />
+            <FontAwesome6 name="notes-medical" size={32} color={color} />
           ),
         }}
       />
@@ -85,7 +116,7 @@ export default function TabLayout() {
         options={{
           title: "My Doctors",
           tabBarIcon: ({ color }) => (
-            <Feather name="phone-call" size={24} color={color} />
+            <Feather name="phone-call" size={32} color={color} />
           ),
         }}
       />
@@ -94,7 +125,7 @@ export default function TabLayout() {
         options={{
           title: "Mascot",
           tabBarIcon: ({ color }) => (
-            <Feather name="eye" size={24} color={color} />
+            <Feather name="eye" size={32} color={color} />
           ),
         }}
       />

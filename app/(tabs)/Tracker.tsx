@@ -115,62 +115,64 @@ const Tracker: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Daily Tracker</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.container}>
+          <Text style={styles.sectionTitle}>Daily Tracker</Text>
 
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Sleeping Patterns</Text>
-        <View style={styles.buttonContainer}>
-          {["4-6 hrs", "6-8 hrs", "8-10 hrs"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                sleep === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("sleep", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+          <View style={styles.trackerCategory}>
+            <Text style={styles.trackerLabel}>Sleeping Patterns</Text>
+            <View style={styles.buttonContainer}>
+              {["4-6 hrs", "6-8 hrs", "8-10 hrs"].map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.trackerButton,
+                    sleep === option && styles.selectedButton,
+                  ]}
+                  onPress={() => handleTrackerSelection("sleep", option)}
+                >
+                  <Text style={styles.buttonText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Eating Habits</Text>
-        <View style={styles.buttonContainer}>
-          {["Healthy", "Moderate", "Unhealthy"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                eating === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("eating", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+          <View style={styles.trackerCategory}>
+            <Text style={styles.trackerLabel}>Eating Habits</Text>
+            <View style={styles.buttonContainer}>
+              {["Healthy", "Moderate", "Unhealthy"].map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.trackerButton,
+                    eating === option && styles.selectedButton,
+                  ]}
+                  onPress={() => handleTrackerSelection("eating", option)}
+                >
+                  <Text style={styles.buttonText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Exercise</Text>
-        <View style={styles.buttonContainer}>
-          {["None", "30 mins", "1 hr", "1.5+ hrs"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                exercise === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("exercise", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+          <View style={styles.trackerCategory}>
+            <Text style={styles.trackerLabel}>Exercise</Text>
+            <View style={styles.buttonContainer}>
+              {["None", "30 mins", "1 hr", "1.5+ hrs"].map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.trackerButton,
+                    exercise === option && styles.selectedButton,
+                  ]}
+                  onPress={() => handleTrackerSelection("exercise", option)}
+                >
+                  <Text style={styles.buttonText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
       <TouchableOpacity style={styles.saveButton} onPress={saveLog}>
         <Text style={styles.saveButtonText}>
@@ -188,7 +190,6 @@ const Tracker: React.FC = () => {
             <Text style={styles.logCountText}>{logs.length}</Text>
           </View>
         )}
-      </TouchableOpacity>
 
       <Modal
         animationType="fade"
@@ -244,16 +245,26 @@ const Tracker: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 140, // Add extra padding at bottom to account for tab bar
+  },
   container: {
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 10,
-    height: 630,
     margin: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -297,9 +308,9 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   bookIcon: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
+    alignSelf: 'flex-end',
+    marginTop: 20,
+    marginRight: 10,
     backgroundColor: "#fff",
     borderRadius: 50,
     padding: 10,

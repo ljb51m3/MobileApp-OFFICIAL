@@ -21,6 +21,81 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Calendar as CalendarView } from "react-native-calendars";
 import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
+import { useIsFocused } from '@react-navigation/native';
+
+// Add type definitions at the top
+type DayMarking = {
+  marked?: boolean;
+  selected?: boolean;
+  selectedColor?: string;
+  selectedTextColor?: string;
+  dots?: Array<{
+    color: string;
+    key: string;
+    size: number;
+  }>;
+  customStyles?: {
+    container?: {
+      backgroundColor?: string;
+      borderWidth?: number;
+      borderColor?: string;
+    };
+    text?: {
+      color?: string;
+      fontWeight?: string;
+    };
+  };
+};
+
+type MarkedDates = {
+  [date: string]: DayMarking;
+};
+
+// Add the event type styles configuration
+const eventTypeStyles = {
+  'personal': {
+    color: '#4A90E2',
+    backgroundColor: '#EBF3FC',
+    borderColor: '#4A90E2',
+    emoji: '👤'
+  },
+  'eye-exam': {
+    color: '#FF6B6B',
+    backgroundColor: '#FFE6E6',
+    borderColor: '#FF6B6B',
+    emoji: '👁️'
+  },
+  'doctor-appointment': {
+    color: '#50C878',
+    backgroundColor: '#E6F5EC',
+    borderColor: '#50C878',
+    emoji: '👨‍⚕️'
+  },
+  'other': {
+    color: '#9B59B6',
+    backgroundColor: '#F4ECF7',
+    borderColor: '#9B59B6',
+    emoji: '��'
+  }
+} as const;
+
+// Add the parseEventDetails function
+const parseEventDetails = (event: ExpoCalendar.Event) => {
+  const notes = event.notes || '';
+  const classificationMatch = notes.match(/\[Classification: (.*?)\]\n?(.*)/s);
+  
+  if (classificationMatch) {
+    return {
+      classification: classificationMatch[1],
+      notes: classificationMatch[2].trim()
+    };
+  }
+  
+  return {
+    classification: 'other',
+    notes: notes.trim()
+  };
+};
 
 export default function HomeScreen() {
   //const [currentTime, setCurrentTime] = useState<string>(
@@ -31,7 +106,7 @@ export default function HomeScreen() {
   const diabetesFacts = [
     "Less than 50% of patients with diabetes regularly schedule eye exams.",
     "Diabetes is the leading cause of kidney failure in the United States.",
-    "Over 30 million people in the U.S. have diabetes, but about 1 in 4 don’t know they have it.",
+    "Over 30 million people in the U.S. have diabetes, but about 1 in 4 don't know they have it.",
     "People with diabetes are at a higher risk for heart disease and stroke.",
     "Diabetes can increase the risk of blindness, nerve damage, and amputations.",
     "Approximately 90-95% of people with diabetes have Type 2 diabetes.",
@@ -40,7 +115,9 @@ export default function HomeScreen() {
   ];
 
   const [randomFact, setRandomFact] = useState<string>("");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<ExpoCalendar.Event[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const isFocused = useIsFocused();
 
   //Checklist
   const [checklist, setChecklist] = useState([
@@ -76,19 +153,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Get Time
-  /*
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const time = new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      });
-      setCurrentTime(time);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-  */
   // Select random fact from array
   useEffect(() => {
     const fact =
@@ -96,26 +160,30 @@ export default function HomeScreen() {
     setRandomFact(fact);
   }, []);
 
-  // Get events from calendar
+  // Function to fetch events
+  const fetchEvents = async () => {
+    try {
+      const calendars = await ExpoCalendar.getCalendarsAsync(ExpoCalendar.EntityTypes.EVENT);
+      const writableCalendars = calendars.filter(calendar => calendar.allowsModifications);
+      const calendarIds = writableCalendars.map(calendar => calendar.id);
+      
+      const fetchedEvents = await ExpoCalendar.getEventsAsync(
+        calendarIds,
+        new Date(),
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      );
+      setEvents(fetchedEvents as any);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  // Fetch events when the component mounts and when it comes into focus
   useEffect(() => {
-    (async () => {
-      const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
-      if (status === "granted") {
-        const calendars = await ExpoCalendar.getCalendarsAsync(
-          ExpoCalendar.EntityTypes.EVENT
-        );
-        if (calendars.length > 0) {
-          const calendarIds = calendars.map((calendar) => calendar.id);
-          const events = await ExpoCalendar.getEventsAsync(
-            calendarIds,
-            new Date(),
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
-          );
-          setEvents(events);
-        }
-      }
-    })();
-  }, []);
+    if (isFocused) {
+      fetchEvents();
+    }
+  }, [isFocused]);
 
   //Toggle Task Completion
   const toggleTaskCompletion = (id: number) => {
@@ -136,6 +204,50 @@ export default function HomeScreen() {
     });
 
     return event.calendarId === "1AD179B2-8C13-4B1E-B0CA-7AFC9843C804";
+  };
+
+  // Add this new function to get today's events
+  const getTodayEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return events.filter((event) => {
+      const eventDate = new Date(event.startDate);
+      return eventDate >= today && eventDate < tomorrow;
+    });
+  };
+
+  // Add this new function to get upcoming events (after getTodayEvents)
+  const getUpcomingEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    return events
+      .filter((event) => {
+        const eventDate = new Date(event.startDate);
+        return eventDate > today && eventDate < nextWeek && isAppCreatedEvent(event);
+      })
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  };
+
+  // Add formatEventDate function to show the date nicely
+  const formatEventDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    } else {
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
   };
 
   return (
@@ -171,7 +283,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/*Checklist Section*/}
+        {/* Checklist Section */}
         <View style={styles.checklistContainer}>
           <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
           {checklist.map((item) => (
@@ -192,76 +304,186 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        {/* Calendar Section*/}
+        {/* Today's Events Section */}
+        <View style={styles.todayEventsContainer}>
+          <Text style={styles.todayEventsTitle}>Today's Events</Text>
+          {getTodayEvents().length > 0 ? (
+            getTodayEvents().map((event) => {
+              const isAppEvent = isAppCreatedEvent(event);
+              const { classification } = parseEventDetails(event);
+              const eventStyle = isAppEvent && classification ? 
+                eventTypeStyles[classification as keyof typeof eventTypeStyles] : undefined;
+
+              return (
+                <View 
+                  key={event.id} 
+                  style={[
+                    styles.eventItem,
+                    isAppEvent && {
+                      backgroundColor: eventStyle?.backgroundColor || '#f0f0f0',
+                      borderWidth: 1,
+                      borderColor: eventStyle?.borderColor || '#ddd',
+                      borderRadius: 8,
+                      padding: 10,
+                      marginVertical: 4
+                    }
+                  ]}
+                >
+                  <Text style={[
+                    styles.eventTime,
+                    isAppEvent && { color: eventStyle?.color || '#2E66E7' }
+                  ]}>
+                    {new Date(event.startDate).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </Text>
+                  <Text style={[
+                    styles.eventTitle,
+                    isAppEvent && { 
+                      color: eventStyle?.color || '#333',
+                      fontWeight: '600'
+                    }
+                  ]}>
+                    {isAppEvent ? `${eventStyle?.emoji || '🔷'} ` : ''}{event.title}
+                  </Text>
+                </View>
+              );
+            })
+          ) : (
+            <Text style={styles.noEventsText}>No events scheduled for today</Text>
+          )}
+        </View>
+
+        {/* Upcoming Events Section */}
+        <View style={styles.upcomingEventsContainer}>
+          <Text style={styles.upcomingEventsTitle}>Upcoming Events</Text>
+          {getUpcomingEvents().length > 0 ? (
+            getUpcomingEvents().map((event) => {
+              const { classification } = parseEventDetails(event);
+              const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
+
+              return (
+                <View 
+                  key={event.id} 
+                  style={[
+                    styles.upcomingEventItem,
+                    {
+                      backgroundColor: eventStyle?.backgroundColor || '#f0f0f0',
+                      borderWidth: 1,
+                      borderColor: eventStyle?.borderColor || '#ddd',
+                    }
+                  ]}
+                >
+                  <View style={styles.upcomingEventHeader}>
+                    <Text style={[
+                      styles.upcomingEventDate,
+                      { color: eventStyle?.color || '#2E66E7' }
+                    ]}>
+                      {formatEventDate(new Date(event.startDate))}
+                    </Text>
+                    <Text style={[
+                      styles.upcomingEventTime,
+                      { color: eventStyle?.color || '#2E66E7' }
+                    ]}>
+                      {new Date(event.startDate).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
+                  </View>
+                  <Text style={[
+                    styles.upcomingEventTitle,
+                    { color: eventStyle?.color || '#333' }
+                  ]}>
+                    {eventStyle?.emoji || '🔷'} {event.title}
+                  </Text>
+                </View>
+              );
+            })
+          ) : (
+            <Text style={styles.noEventsText}>No upcoming events this week</Text>
+          )}
+        </View>
+
+        {/* Calendar Section */}
         <View style={styles.calendarContainer}>
           <CalendarView
             onDayPress={(day: any) => {
               console.log("selected day", day);
             }}
-            markedDates={events.reduce((acc, event) => {
-              const date = event.startDate.toString().split("T")[0];
-              const isAppEvent = isAppCreatedEvent(event);
-              console.log("Processing event:", {
-                date,
-                isAppEvent,
-                calendarId: event.calendarId,
-                title: event.title,
-              });
-              const existingMarking = acc[date] || {};
-              // Check if this date already has an app event
-              const hasExistingAppEvent =
-                existingMarking.customStyles?.container?.backgroundColor ===
-                "#FFE6E6";
-
-              // If this is an app event or the date already has an app event, use app event styling
-              const shouldUseAppStyling = isAppEvent || hasExistingAppEvent;
-
-              return {
-                ...acc,
-                [date]: {
-                  ...existingMarking,
-                  dots: shouldUseAppStyling
-                    ? [
-                        { color: "#FF0000", key: "top", size: 10 },
-                        { color: "#FF0000", key: "right", size: 10 },
-                        { color: "#FF0000", key: "bottom", size: 10 },
-                        { color: "#FF0000", key: "left", size: 10 },
-                      ]
-                    : [{ color: "#666666", key: "regular", size: 4 }],
-                  marked: true,
+            markedDates={Object.entries(
+              events.reduce<{ [key: string]: { hasAppEvent: boolean; events: ExpoCalendar.Event[]; classification?: string } }>(
+                (acc, event: ExpoCalendar.Event) => {
+                  const eventDate = new Date(event.startDate);
+                  const date = eventDate.toISOString().split('T')[0];
+                  
+                  if (!acc[date]) {
+                    acc[date] = { hasAppEvent: false, events: [] };
+                  }
+                  
+                  const isAppEvent = isAppCreatedEvent(event);
+                  if (isAppEvent) {
+                    acc[date].hasAppEvent = true;
+                    const { classification } = parseEventDetails(event);
+                    acc[date].classification = classification;
+                  }
+                  
+                  acc[date].events.push(event);
+                  return acc;
                 },
-                customStyles: shouldUseAppStyling
-                  ? {
-                      container: {
-                        backgroundColor: "#FFE6E6",
-                        borderWidth: 2,
-                        borderColor: "#FF0000",
-                        borderRadius: 5,
-                      },
-                      text: {
-                        color: "#FF0000",
-                        fontWeight: "bold",
-                      },
+                {}
+              )
+            ).reduce<MarkedDates>((markings, [date, dateData]) => {
+              const isSelected = date === selectedDate;
+              const eventStyle = dateData.classification ? eventTypeStyles[dateData.classification as keyof typeof eventTypeStyles] : undefined;
+              
+              return {
+                ...markings,
+                [date]: {
+                  marked: true,
+                  selected: isSelected,
+                  selectedColor: isSelected ? (eventStyle?.color || '#2E66E7') : (eventStyle?.backgroundColor || '#f0f0f0'),
+                  selectedTextColor: '#FFFFFF',
+                  dots: dateData.hasAppEvent ? [
+                    { color: eventStyle?.color || '#666666', key: 'regular', size: 4 }
+                  ] : [
+                    { color: '#666666', key: 'regular', size: 4 }
+                  ],
+                  customStyles: dateData.hasAppEvent ? {
+                    container: {
+                      backgroundColor: isSelected ? (eventStyle?.color || '#2E66E7') : (eventStyle?.backgroundColor || '#f0f0f0'),
+                      borderWidth: 1,
+                      borderColor: eventStyle?.borderColor || '#ddd'
+                    },
+                    text: {
+                      color: isSelected ? '#FFFFFF' : (eventStyle?.color || '#333'),
+                      fontWeight: 'bold'
                     }
-                  : undefined,
+                  } : undefined
+                }
               };
-            }, {} as Record<string, any>)}
-            markingType={"custom"}
+            }, {} as MarkedDates)}
+            markingType={'custom'}
             theme={{
-              backgroundColor: "#ffffff",
-              calendarBackground: "#ffffff",
-              selectedDayBackgroundColor: "#2E66E7",
-              selectedDayTextColor: "#FFFFFF",
-              todayTextColor: "#2E66E7",
-              dayTextColor: "#2d4150",
-              textDisabledColor: "#d9e1e8",
-              dotColor: "#666666",
-              selectedDotColor: "#FFFFFF",
-              arrowColor: "#2E66E7",
-              monthTextColor: "#2d4150",
+              backgroundColor: '#ffffff',
+              calendarBackground: '#ffffff',
+              selectedDayBackgroundColor: '#2E66E7',
+              selectedDayTextColor: '#FFFFFF',
+              todayTextColor: '#2E66E7',
+              dayTextColor: '#2d4150',
+              textDisabledColor: '#d9e1e8',
+              dotColor: '#666666',
+              selectedDotColor: '#FFFFFF',
+              arrowColor: '#2E66E7',
+              monthTextColor: '#2d4150',
               textDayFontSize: 16,
-              textMonthFontSize: 16,
+              textMonthFontSize: 18,
               textDayHeaderFontSize: 16,
+              textSectionTitleColor: '#2d4150',
+              textDayFontWeight: '600',
+              textMonthFontWeight: 'bold',
+              textDayHeaderFontWeight: '600'
             }}
             style={styles.calendar}
           />
@@ -389,7 +611,95 @@ const styles = StyleSheet.create({
     color: "#a9a9a9",
   },
   scrollContainer: {
-    paddingBottom: 20,
+    flexGrow: 1,
+    paddingBottom: 80,
+  },
+  todayEventsContainer: {
+    width: 335,
+    marginTop: 20,
+    marginLeft: 10,
+    marginRight: 10,
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  todayEventsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#2d4150',
+  },
+  eventItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  eventTime: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2E66E7',
+    width: 80,
+  },
+  eventTitle: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+  },
+  noEventsText: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 10,
+  },
+  upcomingEventsContainer: {
+    width: 335,
+    marginTop: 20,
+    marginLeft: 10,
+    marginRight: 10,
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  upcomingEventsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#2d4150',
+  },
+  upcomingEventItem: {
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  upcomingEventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  upcomingEventDate: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  upcomingEventTime: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  upcomingEventTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 4,
   },
 });
 
