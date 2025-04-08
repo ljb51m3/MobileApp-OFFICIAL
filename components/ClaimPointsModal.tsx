@@ -9,8 +9,8 @@ const ClaimPointsModal = ({
   points,
 }: {
   visible: boolean;
-  onClose: any;
-  onClaimPoints: any;
+  onClose: () => void;
+  onClaimPoints: () => void;
   task: string;
   points: number;
 }) => {
@@ -23,16 +23,20 @@ const ClaimPointsModal = ({
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
+          <Text style={styles.modalHeader}>🎉 Task Completed! 🎉</Text>
+          <View style={styles.divider} />
           <Text style={styles.modalText}>
             You completed: <Text style={styles.boldText}>{task}</Text>
           </Text>
-          <Text style={styles.modalText}>Claim your {points} points!</Text>
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={onClaimPoints}
-          >
-            <Text style={styles.textStyle}>CLAIM</Text>
-          </Pressable>
+          <Text style={styles.pointsText}>+{points} points!</Text>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={[styles.button, styles.claimButton]}
+              onPress={onClaimPoints}
+            >
+              <Text style={styles.buttonText}>CLAIM POINTS</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
@@ -44,13 +48,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 20,
+    padding: 25,
+    width: "85%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -61,26 +66,53 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  button: {
-    borderRadius: 5,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonClose: {
-    backgroundColor: "#095da7",
-  },
-  textStyle: {
-    color: "white",
+  modalHeader: {
+    fontSize: 20,
     fontWeight: "bold",
+    color: "#095da7",
+    marginBottom: 10,
     textAlign: "center",
+  },
+  divider: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#e0e0e0",
+    marginVertical: 10,
   },
   modalText: {
-    marginBottom: 15,
+    marginBottom: 10,
     textAlign: "center",
     fontSize: 16,
+    color: "#333",
   },
   boldText: {
     fontWeight: "bold",
+    color: "#095da7",
+  },
+  pointsText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#4CAF50",
+    marginVertical: 15,
+  },
+  buttonContainer: {
+    width: "100%",
+    marginTop: 10,
+  },
+  button: {
+    borderRadius: 10,
+    padding: 15,
+    elevation: 2,
+    width: "100%",
+  },
+  claimButton: {
+    backgroundColor: "#095da7",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 16,
   },
 });
 

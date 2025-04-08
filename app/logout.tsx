@@ -9,7 +9,7 @@ run npm install expo-linear-gradient --> added a gradient background
 import * as React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import AppleAuth from "./auth/appleauth";
-import { LinearGradient } from "expo-linear-gradient";
+// import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
 export default function LogOutScreen() {
