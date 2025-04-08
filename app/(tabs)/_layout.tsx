@@ -26,9 +26,9 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         headerTitleStyle: {
           fontSize: 24,
-          fontWeight: '700',
+          fontWeight: "700",
           flex: 1,
-          textAlign: 'center',
+          textAlign: "center",
         },
         tabBarStyle: Platform.select({
           ios: {
@@ -44,7 +44,7 @@ export default function TabLayout() {
         }),
         tabBarLabelStyle: {
           fontSize: 14,
-          fontWeight: '600',
+          fontWeight: "600",
           marginTop: 12, // Increased space between icon and text
           paddingBottom: 25, // Increased bottom padding for text
         },
@@ -63,7 +63,7 @@ export default function TabLayout() {
           paddingRight: 15,
         },
         headerTitleContainerStyle: {
-          maxWidth: '60%',
+          maxWidth: "60%",
           paddingBottom: 15, // Add padding to lower the title
         },
         headerTintColor: Colors[colorScheme ?? "light"].text,
