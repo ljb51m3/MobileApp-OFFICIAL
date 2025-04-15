@@ -443,6 +443,15 @@ import React, { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export const getAppleFirstName = async () => {
+  try {
+    const storedName = await SecureStore.getItemAsync("appleFirstName");
+    return storedName || "";
+  } catch (error) {
+    console.error("Error retrieving Apple name:", error);
+  }
+};
+
 export default function AppleAuth() {
   const router = useRouter();
   const [user, setUser] =
