@@ -1,391 +1,324 @@
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   TouchableOpacity,
-//   Image,
-//   ScrollView,
-// } from "react-native";
-// import ClaimPointsModal from "../../components/ClaimPointsModal";
-
-// const MascotPage = () => {
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [points, setPoints] = useState(0);
-//   const [selectedTask, setSelectedTask] = useState(Object);
-
-//   const tasks = [
-//     { id: 1, text: "Eat a well-balanced meal", points: 10 },
-//     { id: 2, text: "Exercise for 30 minutes", points: 15 },
-//     { id: 3, text: "Take your medication", points: 5 },
-//     { id: 4, text: "Check blood sugar levels", points: 5 },
-//   ];
-
-//   const handleTaskClick = (task: any) => {
-//     setSelectedTask(task);
-//     setModalVisible(true);
-//   };
-
-//   const claimPoints = () => {
-//     if (selectedTask) {
-//       setPoints(points + selectedTask.points);
-//       setModalVisible(false);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <View style={styles.pointsContainer}>
-//         <Text style={styles.pointsText}>Total Points: {points}</Text>
-//       </View>
-//       <>
-//         <Image
-//           source={require("../../assets/images/Eyeball.png")}
-//           style={styles.petImage}
-//         />
-//         <ScrollView style={styles.container}>
-//           <View style={styles.tasksContainer}>
-//             {tasks.map((task) => (
-//               <View key={task.id} style={styles.taskItem}>
-//                 <Text style={styles.taskText}>{task.text}</Text>
-//                 <TouchableOpacity
-//                   style={styles.taskButton}
-//                   onPress={() => handleTaskClick(task)}
-//                 >
-//                   <Text style={styles.buttonText}>Claim</Text>
-//                 </TouchableOpacity>
-//               </View>
-//             ))}
-//           </View>
-
-//           <ClaimPointsModal
-//             visible={modalVisible}
-//             onClose={() => setModalVisible(false)}
-//             onClaimPoints={claimPoints}
-//             task={selectedTask ? selectedTask.text : ""}
-//             points={selectedTask ? selectedTask.points : 0}
-//           />
-//         </ScrollView>
-//       </>
-//     </>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-// container: {
-//   flex: 1,
-//   padding: 20,
-//   backgroundColor: "#f5f5f5",
-// },
-// pointsContainer: {
-//   alignSelf: "center",
-//   backgroundColor: "#96cbf9",
-//   borderWidth: 2,
-//   borderColor: "#fff",
-//   borderRadius: 10,
-//   padding: 15,
-//   marginTop: 20,
-//   elevation: 3,
-//   shadowColor: "#000",
-//   shadowOffset: { width: 0, height: 2 },
-//   shadowOpacity: 0.1,
-//   shadowRadius: 4,
-// },
-// pointsText: {
-//   fontSize: 18,
-//   fontWeight: "bold",
-//   color: "#095da7",
-// },
-// tasksContainer: {
-//   marginTop: 20,
-// },
-// taskItem: {
-//   flexDirection: "row",
-//   alignItems: "center",
-//   justifyContent: "space-between",
-//   marginBottom: 10,
-//   padding: 10,
-//   backgroundColor: "#fff",
-//   borderRadius: 5,
-//   elevation: 2,
-// },
-// taskText: {
-//   fontSize: 16,
-// },
-// taskButton: {
-//   backgroundColor: "#095da7",
-//   padding: 10,
-//   borderRadius: 5,
-// },
-// buttonText: {
-//   color: "white",
-//   fontWeight: "bold",
-// },
-// petImage: {
-//   width: 280,
-//   height: 200,
-//   alignSelf: "center",
-//   marginTop: 10,
-// },
-// });
-
-// export default MascotPage;
-
 import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
   Image,
+  TouchableOpacity,
+  StyleSheet,
   ScrollView,
-  Platform,
+  Dimensions,
 } from "react-native";
+import { usePoints } from "../../components/PointsSystem";
+import PetInventory from "../../components/Inventory";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ClaimPointsModal from "../../components/ClaimPointsModal";
+import PetStore from "../../components/PetStore";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
-interface Task {
-  id: number;
-  text: string;
-  points: number;
+const { width } = Dimensions.get("window");
+
+type AccessoryPosition =
+  | "topHatPosition"
+  | "monoclePosition"
+  | "bowTiePosition"
+  | "bedheadPosition"
+  | "businessManPosition"
+  | "cowboyHatPosition";
+
+export interface PetAccessory {
+  id: string;
+  name: string;
+  price: number;
+  image: any;
+  equipped?: boolean;
 }
 
-interface AppData {
-  points: number;
-  lastUpdated: string;
-  completed: Record<number, boolean>;
-  dailyTasks: Task[];
-}
-
-const ALL_TASKS: Task[] = [
-  { id: 1, text: "Eat a well-balanced meal", points: 10 },
-  { id: 2, text: "Exercise for 30 minutes", points: 15 },
-  { id: 3, text: "Take your medication", points: 5 },
-  { id: 4, text: "Check blood sugar levels", points: 5 },
-  { id: 5, text: "Drink 8 glasses of water", points: 8 },
-  { id: 6, text: "Meditate for 10 minutes", points: 7 },
-  { id: 7, text: "Get 8 hours of sleep", points: 12 },
-  { id: 8, text: "Take vitamins", points: 5 },
-];
-
-const MascotPage: React.FC = () => {
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [points, setPoints] = useState<number>(0);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [dailyTasks, setDailyTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<Record<number, boolean>>(
-    {}
-  );
+const Mascot = () => {
+  const { points } = usePoints();
+  const [inventory, setInventory] = useState<PetAccessory[]>([]);
+  const [equippedItems, setEquippedItems] = useState<PetAccessory[]>([]);
+  const [storeVisible, setStoreVisible] = useState(false);
 
   useEffect(() => {
-    const initializeTasks = async () => {
+    const loadInventory = async () => {
       try {
-        const today = new Date().toDateString();
         const savedData = await AsyncStorage.getItem("@MascotAppData");
-        const data: AppData = savedData
-          ? JSON.parse(savedData)
-          : { points: 0, lastUpdated: "", completed: {}, dailyTasks: [] };
-
-        if (data.lastUpdated !== today) {
-          const shuffled = [...ALL_TASKS].sort(() => 0.5 - Math.random());
-          const selected = shuffled.slice(0, 4);
-          setDailyTasks(selected);
-
-          await AsyncStorage.setItem(
-            "@MascotAppData",
-            JSON.stringify({
-              points: data.points,
-              lastUpdated: today,
-              completed: {},
-              dailyTasks: selected,
-            } as AppData)
-          );
-        } else {
-          setDailyTasks(data.dailyTasks || []);
-          setCompletedTasks(data.completed || {});
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          setInventory(data.inventory || []);
+          setEquippedItems(data.equippedItems || []);
         }
-
-        setPoints(data.points || 0);
       } catch (error) {
-        console.error("Failed to initialize tasks:", error);
+        console.error("Failed to load inventory", error);
       }
     };
-
-    initializeTasks();
+    loadInventory();
   }, []);
 
-  const handleTaskClick = (task: Task) => {
-    if (!completedTasks[task.id]) {
-      setSelectedTask(task);
-      setModalVisible(true);
+  const saveEquippedItems = async (items: PetAccessory[]) => {
+    try {
+      const savedData = await AsyncStorage.getItem("@MascotAppData");
+      const data = savedData ? JSON.parse(savedData) : {};
+      await AsyncStorage.setItem(
+        "@MascotAppData",
+        JSON.stringify({
+          ...data,
+          equippedItems: items,
+        })
+      );
+    } catch (error) {
+      console.error("Failed to save equipped items", error);
     }
   };
 
-  const claimPoints = async () => {
-    if (selectedTask && !completedTasks[selectedTask.id]) {
-      const newPoints = points + selectedTask.points;
-      const newCompleted = { ...completedTasks, [selectedTask.id]: true };
+  const handleEquip = async (item: PetAccessory) => {
+    if (equippedItems.some((i) => i.id === item.id)) {
+      const newEquippedItems = equippedItems.filter((i) => i.id !== item.id);
+      setEquippedItems(newEquippedItems);
+      await saveEquippedItems(newEquippedItems);
+      return;
+    }
 
-      setPoints(newPoints);
-      setCompletedTasks(newCompleted);
-      setModalVisible(false);
+    const newEquippedItems = [item];
+    setEquippedItems(newEquippedItems);
+    await saveEquippedItems(newEquippedItems);
+  };
 
-      try {
-        const today = new Date().toDateString();
-        await AsyncStorage.setItem(
-          "@MascotAppData",
-          JSON.stringify({
-            points: newPoints,
-            lastUpdated: today,
-            completed: newCompleted,
-            dailyTasks,
-          } as AppData)
-        );
-      } catch (error) {
-        console.error("Failed to save progress:", error);
-      }
+  const saveInventory = async (newInventory: PetAccessory[]) => {
+    try {
+      const data = {
+        inventory: newInventory,
+        equippedItems: equippedItems,
+      };
+      await AsyncStorage.setItem("@MascotAppData", JSON.stringify(data));
+    } catch (error) {
+      console.error("Failed to save inventory", error);
     }
   };
 
   return (
-    <>
-      <View style={styles.pointsContainer}>
-        <Text style={styles.pointsText}>Total Points: {points}</Text>
-      </View>
+    <LinearGradient colors={["#eee", "#eee"]} style={styles.gradient}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.pointsContainer}>
+            <Text style={styles.points}>💰 {points} pts</Text>
+          </View>
 
-      <Image
-        source={require("../../assets/images/Eyeball.png")}
-        style={styles.petImage}
-      />
-
-      <ScrollView style={styles.container}>
-        <View style={styles.tasksContainer}>
-          {dailyTasks.map((task) => (
-            <View
-              key={task.id}
-              style={[
-                styles.taskItem,
-                completedTasks[task.id] && styles.completedTask,
-              ]}
-            >
-              <Text style={styles.taskText}>{task.text}</Text>
-              <TouchableOpacity
-                style={[
-                  styles.taskButton,
-                  completedTasks[task.id] && styles.disabledButton,
-                ]}
-                onPress={() => handleTaskClick(task)}
-                disabled={completedTasks[task.id]}
-              >
-                <Text style={styles.buttonText}>
-                  {completedTasks[task.id] ? "Completed" : "Claim"}
-                </Text>
-              </TouchableOpacity>
+          <View style={styles.petDisplayContainer}>
+            <View style={styles.petContainer}>
+              <Image
+                source={require("../../assets/images/Eyeball.png")}
+                style={styles.petImage}
+              />
+              {equippedItems.map((item) => {
+                const accessoryType = item.name
+                  .toLowerCase()
+                  .replace(/\s+/g, "");
+                return (
+                  <View
+                    key={item.id}
+                    style={
+                      styles[`${accessoryType}Position` as AccessoryPosition]
+                    }
+                  >
+                    <Image
+                      source={item.image}
+                      style={styles.accessoryImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                );
+              })}
             </View>
-          ))}
-        </View>
+          </View>
 
-        <ClaimPointsModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onClaimPoints={claimPoints}
-          task={selectedTask?.text || ""}
-          points={selectedTask?.points || 0}
-        />
-        {__DEV__ && (
           <TouchableOpacity
-            style={styles.debugButton}
-            onPress={async () => {
-              await AsyncStorage.removeItem("@MascotAppData");
-              alert(
-                "Developer Mode: Daily tasks reset!\nReopen the app to see new tasks."
-              );
-            }}
+            onPress={() => setStoreVisible(true)}
+            style={styles.storeButton}
           >
-            <Text style={styles.debugButtonText}>DEV: Reset Day</Text>
+            <Text style={styles.storeButtonText}>🛒 Visit Store</Text>
           </TouchableOpacity>
-        )}
-      </ScrollView>
-    </>
+
+          <View style={styles.inventoryContainer}>
+            <Text style={styles.sectionTitle}>Your Inventory</Text>
+            <PetInventory
+              inventory={inventory}
+              equippedItems={equippedItems}
+              onEquip={handleEquip}
+            />
+          </View>
+        </ScrollView>
+
+        <PetStore
+          visible={storeVisible}
+          onClose={() => setStoreVisible(false)}
+          onPurchase={async (newItem) => {
+            const newInventory = [...inventory, newItem];
+            setInventory(newInventory);
+            await saveInventory(newInventory);
+          }}
+        />
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  debugButton: {
-    position: "absolute",
-    bottom: Platform.OS === "ios" ? 5 : 10,
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    zIndex: 100,
-  },
-  debugButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 12,
-  },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#f5f5f5",
+  },
+  itemContainer: {
+    flex: 1,
+    margin: 8,
+    padding: 15,
+    backgroundColor: "white",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itemImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 10,
+  },
+  equipStatus: {
+    color: "#2196f3",
+    fontSize: 12,
+  },
+  gradient: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
   },
   pointsContainer: {
-    alignSelf: "center",
-    backgroundColor: "#96cbf9",
-    borderWidth: 2,
-    borderColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginTop: 20,
-    elevation: 3,
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 20,
+    alignSelf: "flex-end",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 20,
   },
-  pointsText: {
-    fontSize: 18,
+  points: {
+    fontSize: 16,
     fontWeight: "bold",
     color: "#095da7",
   },
-  tasksContainer: {
-    marginTop: 20,
+  petDisplayContainer: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  taskItem: {
-    flexDirection: "row",
+  petContainer: {
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    elevation: 2,
-  },
-  taskText: {
-    fontSize: 16,
-  },
-  taskButton: {
-    backgroundColor: "#095da7",
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
+    justifyContent: "center",
+    height: 250,
+    position: "relative",
   },
   petImage: {
-    width: 280,
-    height: 200,
-    alignSelf: "center",
-    marginTop: 10,
+    width: 180,
+    height: 180,
+    resizeMode: "contain",
   },
-  completedTask: {
-    opacity: 0.6,
-    backgroundColor: "#e0e0e0",
+  accessoryImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
-  disabledButton: {
-    backgroundColor: "#cccccc",
+  topHatPosition: {
+    position: "absolute",
+    width: 80,
+    height: 60,
+    top: -30,
+    left: width / 2 - 40,
+    zIndex: 10,
+  },
+  monoclePosition: {
+    position: "absolute",
+    width: 85,
+    height: 85,
+    top: 80,
+    left: width / 2 - 75,
+    zIndex: 5,
+  },
+  bowTiePosition: {
+    position: "absolute",
+    width: 50,
+    height: 30,
+    top: 120,
+    left: width / 2 - 25,
+    zIndex: 5,
+  },
+  bedheadPosition: {
+    position: "absolute",
+    width: 100,
+    height: 90,
+    top: 40,
+    left: width / 2 - 80,
+    zIndex: 5,
+  },
+  businessManPosition: {
+    position: "absolute",
+    width: 100,
+    height: 90,
+    top: 40,
+    left: width / 2 - 45,
+    zIndex: 5,
+  },
+  cowboyHatPosition: {
+    position: "absolute",
+    width: 100,
+    height: 90,
+    top: 40,
+    left: width / 2 - 45,
+    zIndex: 5,
+  },
+  storeButton: {
+    backgroundColor: "#095da7",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  storeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  inventoryContainer: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    minHeight: 200,
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#333",
   },
 });
 
-export default MascotPage;
+export default Mascot;

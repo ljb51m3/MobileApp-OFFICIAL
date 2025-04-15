@@ -782,6 +782,7 @@ import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
 import { useIsFocused } from "@react-navigation/native";
 import ClaimPointsModal from "../../components/ClaimPointsModal";
+import { usePoints } from "../../components/PointsSystem";
 
 type DayMarking = {
   marked?: boolean;
@@ -900,7 +901,7 @@ export default function HomeScreen() {
   const isFocused = useIsFocused();
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [points, setPoints] = useState<number>(0);
+  // const [points, setPoints] = useState<number>(0);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [dailyTasks, setDailyTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Record<number, boolean>>(
@@ -935,7 +936,7 @@ export default function HomeScreen() {
           setCompletedTasks(data.completed || {});
         }
 
-        setPoints(data.points || 0);
+        //   setPoints(data.points || 0);
       } catch (error) {
         console.error("Failed to initialize tasks:", error);
       }
@@ -1008,29 +1009,50 @@ export default function HomeScreen() {
     }
   };
 
+  // const claimPoints = async () => {
+  //   if (selectedTask && !completedTasks[selectedTask.id]) {
+  //     const newPoints = points + selectedTask.points;
+  //     const newCompleted = { ...completedTasks, [selectedTask.id]: true };
+
+  //     setPoints(newPoints);
+  //     setCompletedTasks(newCompleted);
+  //     setModalVisible(false);
+
+  //     try {
+  //       const today = new Date().toDateString();
+  //       await AsyncStorage.setItem(
+  //         "@MascotAppData",
+  //         JSON.stringify({
+  //           points: newPoints,
+  //           lastUpdated: today,
+  //           completed: newCompleted,
+  //           dailyTasks,
+  //         } as AppData)
+  //       );
+  //     } catch (error) {
+  //       console.error("Failed to save progress:", error);
+  //     }
+  //   }
+  // };
+
+  const { points, addPoints } = usePoints();
+
   const claimPoints = async () => {
     if (selectedTask && !completedTasks[selectedTask.id]) {
-      const newPoints = points + selectedTask.points;
+      addPoints(selectedTask.points);
       const newCompleted = { ...completedTasks, [selectedTask.id]: true };
-
-      setPoints(newPoints);
       setCompletedTasks(newCompleted);
       setModalVisible(false);
 
-      try {
-        const today = new Date().toDateString();
-        await AsyncStorage.setItem(
-          "@MascotAppData",
-          JSON.stringify({
-            points: newPoints,
-            lastUpdated: today,
-            completed: newCompleted,
-            dailyTasks,
-          } as AppData)
-        );
-      } catch (error) {
-        console.error("Failed to save progress:", error);
-      }
+      const today = new Date().toDateString();
+      await AsyncStorage.setItem(
+        "@MascotAppData",
+        JSON.stringify({
+          lastUpdated: today,
+          completed: newCompleted,
+          dailyTasks,
+        })
+      );
     }
   };
 
@@ -1122,7 +1144,7 @@ export default function HomeScreen() {
           <View style={styles.headerContainer}>
             <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
             <View style={styles.pointsContainer}>
-              <Text style={styles.pointsText}>{points} pts</Text>
+              <Text style={styles.pointsText}>💰 {points} pts</Text>
             </View>
           </View>
           {dailyTasks.map((task) => (
@@ -1555,9 +1577,9 @@ const styles = StyleSheet.create({
   },
   pointsContainer: {
     alignSelf: "flex-start",
-    backgroundColor: "#095da7",
+    backgroundColor: "#fff",
     borderWidth: 2,
-    borderColor: "#095da7",
+    borderColor: "#fff",
     borderRadius: 10,
     padding: 10,
     marginBottom: 15,
@@ -1570,7 +1592,7 @@ const styles = StyleSheet.create({
   pointsText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#095da7",
   },
   pointsLabel: {
     fontSize: 14,
