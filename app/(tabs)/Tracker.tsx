@@ -419,10 +419,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
+import { toZonedTime, format as tzFormat } from "date-fns-tz";
 import { usePoints } from "../../components/PointsSystem";
 import TotalPoints from "../../components/TotalPoints";
 import ClaimPointsModal from "../../components/ClaimPointsModal";
-import CalendarPicker from "react-native-calendar-picker";
+import { Calendar } from "react-native-calendars";
 
 interface Log {
   id: string;
@@ -484,11 +485,11 @@ const Tracker: React.FC = () => {
     const saveLogs = async () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-
         const unviewed = logs.filter((log) => !log.viewed);
         setUnviewedLogCount(unviewed.length);
       } catch (error) {
         console.error("Failed to save logs", error);
+        Alert.alert("Error", "Failed to save logs to storage");
       }
     };
 
@@ -519,13 +520,14 @@ const Tracker: React.FC = () => {
       return;
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayDateString();
     const now = Date.now();
-    const isNewLog = !logs.some((log) => log.date === today);
+
+    const existingLogIndex = logs.findIndex((log) => log.date === today);
+    const isNewLog = existingLogIndex === -1;
 
     try {
       let updatedLogs = [...logs];
-
       if (!isNewLog) {
         const existingLogIndex = logs.findIndex((log) => log.date === today);
         updatedLogs[existingLogIndex] = {
@@ -546,7 +548,7 @@ const Tracker: React.FC = () => {
           timestamp: now,
           viewed: false,
         };
-
+        updatedLogs.unshift(newLog);
         setUnviewedLogCount((prev) => prev + 1);
         setClaimPointsModalVisible(true);
         setShowBadge(true);
@@ -577,7 +579,7 @@ const Tracker: React.FC = () => {
       markLogAsViewed(newIndex);
       return newIndex;
     });
-    setShowDateDropdown(false);
+    setShowCalendar(false);
   };
 
   const goToNextLog = () => {
@@ -588,7 +590,7 @@ const Tracker: React.FC = () => {
       markLogAsViewed(newIndex);
       return newIndex;
     });
-    setShowDateDropdown(false);
+    setShowCalendar(false);
   };
 
   const markLogAsViewed = (index: number) => {
@@ -596,6 +598,14 @@ const Tracker: React.FC = () => {
     if (!updatedLogs[index].viewed) {
       updatedLogs[index].viewed = true;
       setLogs(updatedLogs);
+
+      const updatedMarkedDates = { ...markedDates };
+      updatedMarkedDates[updatedLogs[index].date] = {
+        ...updatedMarkedDates[updatedLogs[index].date],
+        dotColor: "#999",
+      };
+      setMarkedDates(updatedMarkedDates);
+
       setUnviewedLogCount((prev) => prev - 1);
     }
   };
@@ -604,18 +614,30 @@ const Tracker: React.FC = () => {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "No date available";
-    try {
-      const date = new Date(dateString);
-      return format(date, "MMMM do, yyyy");
-    } catch (e) {
-      console.error("Date formatting error:", e);
-      return dateString;
-    }
+    return formatDisplayDate(dateString);
   };
 
   const handleClaimPoints = () => {
     addPoints(10);
     setClaimPointsModalVisible(false);
+  };
+
+  const TIMEZONE = "America/New_York";
+
+  const getTodayDateString = () => {
+    const now = new Date();
+    return tzFormat(now, "yyyy-MM-dd", { timeZone: TIMEZONE });
+  };
+
+  const formatDisplayDate = (dateString: string) => {
+    try {
+      const date = new Date(`${dateString}T00:00:00`);
+      const zonedDate = toZonedTime(date, TIMEZONE);
+      return format(zonedDate, "MMMM do, yyyy");
+    } catch (e) {
+      console.error("Date formatting error:", e);
+      return dateString;
+    }
   };
 
   return (
@@ -679,9 +701,7 @@ const Tracker: React.FC = () => {
 
       <TouchableOpacity style={styles.saveButton} onPress={saveLog}>
         <Text style={styles.saveButtonText}>
-          {logs.some(
-            (log) => log.date === new Date().toISOString().split("T")[0]
-          )
+          {logs.some((log) => log.date === getTodayDateString())
             ? "Update Log"
             : "Save Log"}
         </Text>
@@ -702,7 +722,7 @@ const Tracker: React.FC = () => {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
-          setShowDateDropdown(false);
+          setShowCalendar(false);
         }}
       >
         <View style={styles.modalContainer}>
@@ -713,7 +733,7 @@ const Tracker: React.FC = () => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => setShowDateDropdown(!showDateDropdown)}
+                onPress={() => setShowCalendar(!showCalendar)}
                 style={styles.dateSelector}
               >
                 <Text style={styles.modalTitle}>
@@ -721,55 +741,50 @@ const Tracker: React.FC = () => {
                     ? formatDate(currentLog.date)
                     : "Select a date"}
                 </Text>
+              </TouchableOpacity>
+
+              <View style={styles.iconContainer}>
                 <Ionicons
-                  name={showDateDropdown ? "chevron-up" : "chevron-down"}
+                  name={showCalendar ? "chevron-down" : "chevron-up"}
                   size={20}
                   color="#095da7"
                 />
-              </TouchableOpacity>
+              </View>
 
               <TouchableOpacity onPress={goToNextLog}>
                 <Ionicons name="chevron-forward" size={28} color="#095da7" />
               </TouchableOpacity>
             </View>
 
-            {showDateDropdown && (
-              <View style={styles.logsDropdown}>
-                <ScrollView
-                  style={styles.dropdownScroll}
-                  nestedScrollEnabled={true}
-                >
-                  {sortedLogs.length > 0 ? (
-                    sortedLogs.map((log) => (
-                      <TouchableOpacity
-                        key={log.id}
-                        style={[
-                          styles.dropdownItem,
-                          currentLog?.id === log.id &&
-                            styles.selectedDropdownItem,
-                        ]}
-                        onPress={() => {
-                          const foundIndex = logs.findIndex(
-                            (l) => l.id === log.id
-                          );
-                          if (foundIndex !== -1) {
-                            setCurrentLogIndex(foundIndex);
-                          }
-                          setShowDateDropdown(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownDateText}>
-                          {formatDate(log.date)}
-                        </Text>
-                        {!log.viewed && <View style={styles.unviewedDot} />}
-                      </TouchableOpacity>
-                    ))
-                  ) : (
-                    <Text style={styles.emptyDropdownText}>
-                      No logs available
-                    </Text>
-                  )}
-                </ScrollView>
+            {showCalendar && (
+              <View style={styles.calendarContainer}>
+                <Calendar
+                  markedDates={markedDates}
+                  onDayPress={(day: any) => {
+                    const logIndex = logs.findIndex(
+                      (log) => log.date === day.dateString
+                    );
+                    if (logIndex !== -1) {
+                      setCurrentLogIndex(logIndex);
+                      markLogAsViewed(logIndex);
+                    }
+                    setShowCalendar(false);
+                  }}
+                  theme={{
+                    backgroundColor: "#fff",
+                    calendarBackground: "#fff",
+                    selectedDayBackgroundColor: "#095da7",
+                    selectedDayTextColor: "#fff",
+                    todayTextColor: "#095da7",
+                    dayTextColor: "#333",
+                    textDisabledColor: "#ddd",
+                    arrowColor: "#095da7",
+                    monthTextColor: "#333",
+                    textMonthFontWeight: "bold",
+                    textDayFontSize: 14,
+                    textMonthFontSize: 16,
+                  }}
+                />
               </View>
             )}
 
@@ -800,7 +815,7 @@ const Tracker: React.FC = () => {
               style={styles.closeButton}
               onPress={() => {
                 setModalVisible(false);
-                setShowDateDropdown(false);
+                setShowCalendar(false);
               }}
             >
               <Text style={styles.closeButtonText}>Close</Text>
@@ -968,13 +983,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
-  dateSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 8,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-  },
   logsDropdown: {
     maxHeight: 150,
     width: "80%",
@@ -1018,6 +1026,26 @@ const styles = StyleSheet.create({
     padding: 15,
     textAlign: "center",
     color: "#888",
+  },
+  dateSelector: {
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#eee",
+    borderRadius: 8,
+  },
+  calendarContainer: {
+    width: "100%",
+    marginBottom: 15,
+    borderRadius: 10,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  iconContainer: {
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#eee",
+    borderRadius: 8,
   },
 });
 
