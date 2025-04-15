@@ -741,12 +741,15 @@ const Tracker: React.FC = () => {
                     ? formatDate(currentLog.date)
                     : "Select a date"}
                 </Text>
+              </TouchableOpacity>
+
+              <View style={styles.iconContainer}>
                 <Ionicons
-                  name={showCalendar ? "chevron-up" : "chevron-down"}
+                  name={showCalendar ? "chevron-down" : "chevron-up"}
                   size={20}
                   color="#095da7"
                 />
-              </TouchableOpacity>
+              </View>
 
               <TouchableOpacity onPress={goToNextLog}>
                 <Ionicons name="chevron-forward" size={28} color="#095da7" />
@@ -1025,10 +1028,9 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   dateSelector: {
-    flexDirection: "row",
     alignItems: "center",
     padding: 8,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#eee",
     borderRadius: 8,
   },
   calendarContainer: {
@@ -1038,6 +1040,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#ddd",
+  },
+  iconContainer: {
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#eee",
+    borderRadius: 8,
   },
 });
 
