@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import { Video } from "expo-av";
+import YouTube from "react-native-youtube-iframe";
 import TotalPoints from "../../components/TotalPoints";
 
 const Learn = () => {
@@ -15,30 +15,25 @@ const Learn = () => {
     {
       id: 1,
       title: "Understanding Diabetes",
-      source: require("../../assets/images/DRVideo.mp4"),
+      videoId: "Mko250V6PYI",
     },
     {
       id: 2,
       title: "What is Diabetic Retinopathy?",
-      source: require("../../assets/images/DRVideo.mp4"),
+      videoId: "Y7m4J09lEKA",
     },
   ];
 
   const articles = [
     {
       id: 1,
-      title: "10 Tips for Managing Diabetes",
-      url: "https://example.com/diabetes-tips",
+      title: "About Diabetic Retinopathy",
+      url: "https://diabetes.org/health-wellness/eye-health/what-is-retinopathy",
     },
     {
       id: 2,
-      title: "Preventing Diabetic Retinopathy",
-      url: "https://example.com/prevent-retinopathy",
-    },
-    {
-      id: 3,
-      title: "Healthy Eating for Diabetics",
-      url: "https://example.com/healthy-eating",
+      title: "Am I at Risk?",
+      url: "https://www.nei.nih.gov/learn-about-eye-health/eye-conditions-and-diseases/diabetic-retinopathy",
     },
   ];
 
@@ -49,41 +44,45 @@ const Learn = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <TotalPoints />
-      <Text style={styles.sectionTitle}>Educational Videos</Text>
-      {videos.map((video) => (
-        <View key={video.id} style={styles.videoContainer}>
-          <Text style={styles.videoTitle}>{video.title}</Text>
-          <Video
-            source={video.source}
-            style={styles.video}
-            useNativeControls
-            isLooping
-          />
-        </View>
-      ))}
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <TotalPoints />
 
-      <Text style={styles.sectionTitle}>Educational Articles</Text>
-      {articles.map((article) => (
-        <TouchableOpacity
-          key={article.id}
-          style={styles.articleContainer}
-          onPress={() => openArticle(article.url)}
-        >
-          <Text style={styles.articleTitle}>{article.title}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+        <Text style={styles.sectionTitle}>Educational Videos</Text>
+        {videos.map((video) => (
+          <View key={video.id} style={styles.videoContainer}>
+            <Text style={styles.videoTitle}>{video.title}</Text>
+            <YouTube
+              videoId={video.videoId}
+              height={200}
+              play={false}
+              webViewProps={{
+                allowsFullscreenVideo: true,
+              }}
+            />
+          </View>
+        ))}
+
+        <Text style={styles.sectionTitle}>Educational Articles</Text>
+        {articles.map((article) => (
+          <TouchableOpacity
+            key={article.id}
+            style={styles.articleContainer}
+            onPress={() => openArticle(article.url)}
+          >
+            <Text style={styles.articleTitle}>{article.title}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
     padding: 20,
+    paddingBottom: 150,
     backgroundColor: "#f0f8ff",
-    height: 900,
   },
   sectionTitle: {
     fontSize: 22,
@@ -100,16 +99,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#444",
   },
-  video: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-  },
   articleContainer: {
     backgroundColor: "#fff",
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
