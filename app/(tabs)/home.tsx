@@ -18,8 +18,8 @@ import * as ExpoCalendar from "expo-calendar";
 import { Event } from "expo-calendar";
 import { useIsFocused } from "@react-navigation/native";
 import ClaimPointsModal from "../../components/ClaimPointsModal";
-import {getAppleFirstName} from "../auth/appleauth";
-import {LinearGradient} from "expo-linear-gradient";
+import { getAppleFirstName } from "../auth/appleauth";
+import { LinearGradient } from "expo-linear-gradient";
 
 type DayMarking = {
   marked?: boolean;
@@ -323,12 +323,12 @@ export default function HomeScreen() {
       <View style={styles.container}>
         <Text style={styles.welcomeText}>Welcome!</Text>
         {isLoading ? (
-          <Text style = {styles.loadingText}>Fetching Apple ID...</Text>
-        ) : name? (
-          <Text style = {styles.nameText}>{name}</Text>
+          <Text style={styles.loadingText}>Fetching Apple ID...</Text>
+        ) : name ? (
+          <Text style={styles.nameText}>{name}</Text>
         ) : (
-          <Text style = {styles.nameText}>Guest</Text>
-        )}    
+          <Text style={styles.nameText}>Guest</Text>
+        )}
 
         {/* Welcome Message */}
         <Text style={styles.welcomeMessage}>How's it going today?</Text>
@@ -339,9 +339,12 @@ export default function HomeScreen() {
             source={require("../../assets/images/eyemascot.png")}
             style={styles.image}
           />
-          <LinearGradient colors = {["#cce5ff", "#e6f2ff"]} style = {styles.factBubble}>
-            <Text style = {styles.factTitle}>💡 Did you know?</Text>
-            <Text style = {styles.factText}>{randomFact}</Text>
+          <LinearGradient
+            colors={["#cce5ff", "#e6f2ff"]}
+            style={styles.factBubble}
+          >
+            <Text style={styles.factTitle}>💡 Did you know?</Text>
+            <Text style={styles.factText}>{randomFact}</Text>
           </LinearGradient>
         </View>
 
@@ -632,7 +635,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   debugButton: {
     position: "absolute",
-    bottom: Platform.OS === "ios" ? 620 : 10,
+    bottom: Platform.OS === "ios" ? 670 : 10,
     backgroundColor: "red",
     padding: 10,
     borderRadius: 5,
@@ -651,6 +654,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingTop: 10,
     paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 30,
   },
   welcomeText: {
     fontSize: 30,
@@ -707,7 +712,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "5e81c2",
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
@@ -731,20 +736,18 @@ const styles = StyleSheet.create({
   },
   calendarContainer: {
     marginTop: 20,
-    marginLeft: 10,
-    marginRight: 10,
     marginBottom: 20,
+    width: "100%",
   },
   calendar: {
-    width: 370,
+    width: "100%",
     borderWidth: 1,
     borderColor: "#ddd",
+    borderRadius: 10,
   },
   checklistContainer: {
-    width: 370,
+    width: "100%",
     marginTop: 20,
-    marginLeft: 10,
-    marginRight: 10,
     marginBottom: 20,
     padding: 15,
     backgroundColor: "#f8f9fa",
@@ -823,10 +826,9 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   todayEventsContainer: {
-    width: 370,
+    width: "100%",
     marginTop: 20,
-    marginLeft: 10,
-    marginRight: 10,
+    marginBottom: 20,
     padding: 15,
     backgroundColor: "#f8f9fa",
     borderRadius: 10,
@@ -865,10 +867,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   upcomingEventsContainer: {
-    width: 370,
+    width: "100%",
     marginTop: 20,
-    marginLeft: 10,
-    marginRight: 10,
+    marginBottom: 20,
     padding: 15,
     backgroundColor: "#f8f9fa",
     borderRadius: 10,

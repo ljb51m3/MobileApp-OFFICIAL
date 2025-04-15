@@ -79,9 +79,9 @@ const SurveyPhoto = () => {
           <View style={styles.surveyBox}>
             <Text style={styles.title}>Diabetes Eye Health Screening</Text>
             <Text style={[styles.text, { color: "#1517C2" }]}>
-              To gain a better understanding of how we can assist you, we
-              kindly request your participation in a brief questionnaire
-              regarding your vision.{" "}
+              To gain a better understanding of how we can assist you, we kindly
+              request your participation in a brief questionnaire regarding your
+              vision.{" "}
               <Text style={{ fontWeight: "bold" }}>
                 Please feel free to answer the questions below
               </Text>{" "}
@@ -165,7 +165,10 @@ const SurveyPhoto = () => {
         </ViewShot>
 
         <View style={styles.buttonContainer}>
-          <Button title="Save Survey to Photos" onPress={handleCaptureAndSave} />
+          <Button
+            title="Save Survey to Photos"
+            onPress={handleCaptureAndSave}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
