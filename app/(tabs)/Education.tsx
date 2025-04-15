@@ -8,6 +8,7 @@ import {
   Linking,
 } from "react-native";
 import { Video } from "expo-av";
+import TotalPoints from "../../components/TotalPoints";
 
 const Learn = () => {
   const videos = [
@@ -49,6 +50,7 @@ const Learn = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <TotalPoints />
       <Text style={styles.sectionTitle}>Educational Videos</Text>
       {videos.map((video) => (
         <View key={video.id} style={styles.videoContainer}>

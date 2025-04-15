@@ -57,7 +57,8 @@ export default function CalendarScreen() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showTimePickerModal, setShowTimePickerModal] = useState(false);
   const [isStartTime, setIsStartTime] = useState(true);
-  const [selectedClassification, setSelectedClassification] = useState("personal");
+  const [selectedClassification, setSelectedClassification] =
+    useState("personal");
   const [showClassificationModal, setShowClassificationModal] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -70,7 +71,9 @@ export default function CalendarScreen() {
   const [startPeriod, setStartPeriod] = useState("AM");
   const [endPeriod, setEndPeriod] = useState("AM");
   const [showDatePickerModal, setShowDatePickerModal] = useState(false);
-  const [selectedEventDate, setSelectedEventDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedEventDate, setSelectedEventDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [selectedAlerts, setSelectedAlerts] = useState<string[]>(["15"]);
@@ -80,10 +83,10 @@ export default function CalendarScreen() {
 
   // Add useEffect to log state changes
   useEffect(() => {
-    console.log('Modal visibility changed:', {
+    console.log("Modal visibility changed:", {
       showDatePickerModal,
       isFollowUpScheduling,
-      modalShouldShow: showDatePickerModal && isFollowUpScheduling
+      modalShouldShow: showDatePickerModal && isFollowUpScheduling,
     });
   }, [showDatePickerModal, isFollowUpScheduling]);
 
@@ -110,39 +113,43 @@ export default function CalendarScreen() {
   };
 
   const EventClassification: EventClassification[] = [
-    {label: "Personal", value: "personal", selected: false},
-    {label: "Eye Exam", value: "eye-exam", selected: false},
-    {label: "Doctor Appointment", value: "doctor-appointment", selected: false},
-    {label: "Other", value: "other", selected: false},
-];
+    { label: "Personal", value: "personal", selected: false },
+    { label: "Eye Exam", value: "eye-exam", selected: false },
+    {
+      label: "Doctor Appointment",
+      value: "doctor-appointment",
+      selected: false,
+    },
+    { label: "Other", value: "other", selected: false },
+  ];
 
-// Add this near the EventClassification definition
-const eventTypeStyles = {
-  'personal': {
-    color: '#4A90E2',
-    backgroundColor: '#EBF3FC',
-    borderColor: '#4A90E2',
-    emoji: '👤'
-  },
-  'eye-exam': {
-    color: '#FF6B6B',
-    backgroundColor: '#FFE6E6',
-    borderColor: '#FF6B6B',
-    emoji: '👁️'
-  },
-  'doctor-appointment': {
-    color: '#50C878',
-    backgroundColor: '#E6F5EC',
-    borderColor: '#50C878',
-    emoji: '👨‍⚕️'
-  },
-  'other': {
-    color: '#9B59B6',
-    backgroundColor: '#F4ECF7',
-    borderColor: '#9B59B6',
-    emoji: '��'
-  }
-} as const;
+  // Add this near the EventClassification definition
+  const eventTypeStyles = {
+    personal: {
+      color: "#4A90E2",
+      backgroundColor: "#EBF3FC",
+      borderColor: "#4A90E2",
+      emoji: "👤",
+    },
+    "eye-exam": {
+      color: "#FF6B6B",
+      backgroundColor: "#FFE6E6",
+      borderColor: "#FF6B6B",
+      emoji: "👁️",
+    },
+    "doctor-appointment": {
+      color: "#50C878",
+      backgroundColor: "#E6F5EC",
+      borderColor: "#50C878",
+      emoji: "👨‍⚕️",
+    },
+    other: {
+      color: "#9B59B6",
+      backgroundColor: "#F4ECF7",
+      borderColor: "#9B59B6",
+      emoji: "��",
+    },
+  } as const;
 
   const generateTimeOptions = () => {
     const times = [];
@@ -251,16 +258,16 @@ const eventTypeStyles = {
     return events.filter((event: ExpoCalendar.Event) => {
       // Convert event date to local timezone and strip time
       const eventDate = new Date(event.startDate);
-      const eventDateString = eventDate.toISOString().split('T')[0];
+      const eventDateString = eventDate.toISOString().split("T")[0];
       return eventDateString === date;
     });
   };
 
   const toggleAlert = (value: string) => {
-    setSelectedAlerts(prev => {
+    setSelectedAlerts((prev) => {
       if (prev.includes(value)) {
         // Remove the value if it was already selected
-        return prev.filter(v => v !== value);
+        return prev.filter((v) => v !== value);
       } else {
         // Add the new value
         return [...prev, value];
@@ -273,7 +280,7 @@ const eventTypeStyles = {
       // Convert times for comparison
       const startTime = formatTo24Hour(newEvent.startTime, startPeriod);
       const endTime = formatTo24Hour(newEvent.endTime, endPeriod);
-      
+
       // Check times without closing the event modal
       if (startTime >= endTime) {
         setErrorMessage("End time must be after start time");
@@ -310,7 +317,7 @@ const eventTypeStyles = {
       endDate.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
 
       // Create the alarm object based on selected alerts
-      const alarms = selectedAlerts.map(alert => ({
+      const alarms = selectedAlerts.map((alert) => ({
         relativeOffset: -parseInt(alert),
         method: ExpoCalendar.AlarmMethod.ALERT,
       }));
@@ -321,7 +328,9 @@ const eventTypeStyles = {
         endDate,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         location: newEvent.location,
-        notes: `[Classification: ${newEvent.classification}]\n${newEvent.notes || ''}`,
+        notes: `[Classification: ${newEvent.classification}]\n${
+          newEvent.notes || ""
+        }`,
         alarms: alarms,
       });
 
@@ -365,7 +374,7 @@ const eventTypeStyles = {
       );
       setEvents(updatedEvents as any);
     } catch (error) {
-      console.error('Error refreshing events:', error);
+      console.error("Error refreshing events:", error);
     }
   };
 
@@ -389,43 +398,45 @@ const eventTypeStyles = {
   // Update the isAppCreatedEvent function
   const isAppCreatedEvent = (event: ExpoCalendar.Event) => {
     // Log event details for debugging
-    console.log('Event details:', {
+    console.log("Event details:", {
       id: event.id,
       title: event.title,
       calendarId: event.calendarId,
     });
-    
+
     // Check specifically for the app's calendar ID
-    return event.calendarId === '1AD179B2-8C13-4B1E-B0CA-7AFC9843C804';
+    return event.calendarId === "1AD179B2-8C13-4B1E-B0CA-7AFC9843C804";
   };
 
   // Add this helper function near the top of the component
   const parseEventDetails = (event: ExpoCalendar.Event) => {
-    const notes = event.notes || '';
-    const classificationMatch = notes.match(/\[Classification: (.*?)\]\n?(.*)/s);
-    
+    const notes = event.notes || "";
+    const classificationMatch = notes.match(
+      /\[Classification: (.*?)\]\n?(.*)/s
+    );
+
     if (classificationMatch) {
       return {
         classification: classificationMatch[1],
-        notes: classificationMatch[2].trim()
+        notes: classificationMatch[2].trim(),
       };
     }
-    
+
     return {
-      classification: 'other',
-      notes: notes.trim()
+      classification: "other",
+      notes: notes.trim(),
     };
   };
 
   const handleDateSelection = async (dateString: string) => {
     setSelectedEventDate(dateString);
-    
+
     if (isFollowUpScheduling) {
       // Calculate the follow-up date (6 months later)
       const initialDate = new Date(dateString);
       const followUpDate = new Date(initialDate);
       followUpDate.setMonth(followUpDate.getMonth() + 6);
-      
+
       // Create the follow-up event
       try {
         const calendars = await ExpoCalendar.getCalendarsAsync();
@@ -447,7 +458,7 @@ const eventTypeStyles = {
           startDate: followUpDate,
           endDate: new Date(followUpDate.getTime() + 60 * 60 * 1000), // 1 hour duration
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          notes: '[Classification: eye-exam]\nScheduled follow-up appointment',
+          notes: "[Classification: eye-exam]\nScheduled follow-up appointment",
           alarms: [
             {
               relativeOffset: -1440, // 1 day before
@@ -456,16 +467,16 @@ const eventTypeStyles = {
             {
               relativeOffset: -60, // 1 hour before
               method: ExpoCalendar.AlarmMethod.ALERT,
-            }
+            },
           ],
         });
 
         // Reset follow-up scheduling state
         setIsFollowUpScheduling(false);
-        
+
         // Refresh events
         await refreshEvents();
-        
+
         // Show success message
         Alert.alert(
           "Reminder Scheduled",
@@ -477,7 +488,7 @@ const eventTypeStyles = {
         setShowErrorModal(true);
       }
     }
-    
+
     setShowDatePickerModal(false);
   };
 
@@ -485,58 +496,68 @@ const eventTypeStyles = {
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* Error Modal - Move it here, at the very top level */}
       {showErrorModal && (
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999,
-          elevation: 99999,
-        }}>
-          <View style={{
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 10,
-            width: '80%',
-            alignItems: 'center',
-          }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: '#dc3545',
-              marginBottom: 15,
-              textAlign: 'center',
-            }}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 99999,
+            elevation: 99999,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              width: "80%",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#dc3545",
+                marginBottom: 15,
+                textAlign: "center",
+              }}
+            >
               Error
             </Text>
-            <Text style={{
-              fontSize: 16,
-              marginBottom: 20,
-              textAlign: 'center',
-              color: '#333',
-            }}>
+            <Text
+              style={{
+                fontSize: 16,
+                marginBottom: 20,
+                textAlign: "center",
+                color: "#333",
+              }}
+            >
               {errorMessage}
             </Text>
             <TouchableOpacity
               onPress={() => setShowErrorModal(false)}
               style={{
-                backgroundColor: '#dc3545',
+                backgroundColor: "#dc3545",
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 5,
                 minWidth: 100,
               }}
             >
-              <Text style={{
-                color: 'white',
-                fontSize: 16,
-                textAlign: 'center',
-                fontWeight: '500',
-              }}>
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 16,
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
+              >
                 OK
               </Text>
             </TouchableOpacity>
@@ -582,60 +603,68 @@ const eventTypeStyles = {
           </View>
 
           {/* Follow-up Scheduler Section */}
-          <View style={{
-            backgroundColor: '#f8f9fa',
-            padding: 15,
-            borderRadius: 10,
-            marginBottom: 20,
-            width: '100%',
-            borderWidth: 1,
-            borderColor: '#dee2e6',
-          }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: '600',
-              marginBottom: 10,
-              color: '#2d4150'
-            }}>
+          <View
+            style={{
+              backgroundColor: "#f8f9fa",
+              padding: 15,
+              borderRadius: 10,
+              marginBottom: 20,
+              width: "100%",
+              borderWidth: 1,
+              borderColor: "#dee2e6",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                marginBottom: 10,
+                color: "#2d4150",
+              }}
+            >
               Schedule Eye Exam Reminder
             </Text>
-            <Text style={{
-              fontSize: 14,
-              color: '#666',
-              marginBottom: 10
-            }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#666",
+                marginBottom: 10,
+              }}
+            >
               Select a date to schedule a reminder for your eye exam in 6 months
             </Text>
             <TouchableOpacity
               onPress={() => {
-                console.log('Schedule Reminder button pressed');
-                const today = new Date().toISOString().split('T')[0];
-                console.log('Setting selectedEventDate to:', today);
+                console.log("Schedule Reminder button pressed");
+                const today = new Date().toISOString().split("T")[0];
+                console.log("Setting selectedEventDate to:", today);
                 setSelectedEventDate(today);
-                console.log('Setting isFollowUpScheduling to: true');
+                console.log("Setting isFollowUpScheduling to: true");
                 setIsFollowUpScheduling(true);
-                console.log('Setting showDatePickerModal to: true');
+                console.log("Setting showDatePickerModal to: true");
                 setShowDatePickerModal(true);
-                console.log('States set, modal should appear');
+                console.log("States set, modal should appear");
               }}
               style={{
-                backgroundColor: '#50C878',
+                backgroundColor: "#50C878",
                 padding: 12,
                 borderRadius: 8,
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center'
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
               }}
             >
-              <Text style={{
-                color: 'white',
-                fontSize: 16,
-                fontWeight: '600',
-                marginRight: 8
-              }}>
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginRight: 8,
+                }}
+              >
                 Schedule Reminder
               </Text>
-              <Text style={{ color: 'white', fontSize: 18 }}>📅</Text>
+              <Text style={{ color: "white", fontSize: 18 }}>📅</Text>
             </TouchableOpacity>
           </View>
 
@@ -646,84 +675,108 @@ const eventTypeStyles = {
             markedDates={{
               ...Object.fromEntries(
                 Object.entries(
-                  events.reduce((acc: { [key: string]: ExpoCalendar.Event[] }, event: ExpoCalendar.Event) => {
-                    const eventDate = new Date(event.startDate);
-                    const date = eventDate.toISOString().split('T')[0];
-                    if (!acc[date]) {
-                      acc[date] = [];
-                    }
-                    acc[date].push(event);
-                    return acc;
-                  }, {})
+                  events.reduce(
+                    (
+                      acc: { [key: string]: ExpoCalendar.Event[] },
+                      event: ExpoCalendar.Event
+                    ) => {
+                      const eventDate = new Date(event.startDate);
+                      const date = eventDate.toISOString().split("T")[0];
+                      if (!acc[date]) {
+                        acc[date] = [];
+                      }
+                      acc[date].push(event);
+                      return acc;
+                    },
+                    {}
+                  )
                 ).map(([date, dateEvents]) => {
                   const isSelected = date === selectedDate;
-                  
+
                   // Check if there's an app-created event for this date
-                  const appEvent = dateEvents.find(event => isAppCreatedEvent(event));
-                  
+                  const appEvent = dateEvents.find((event) =>
+                    isAppCreatedEvent(event)
+                  );
+
                   if (appEvent) {
                     // If there's an app event, use its styling
                     const { classification } = parseEventDetails(appEvent);
-                    const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
-                    
-                    return [date, {
-                      marked: true,
-                      selected: isSelected,
-                      customStyles: {
-                        container: {
-                          backgroundColor: isSelected ? '#2E66E7' : 'transparent',
-                          borderWidth: 2,
-                          borderColor: eventStyle?.color || '#2E66E7',
-                          borderRadius: 20
+                    const eventStyle =
+                      eventTypeStyles[
+                        classification as keyof typeof eventTypeStyles
+                      ];
+
+                    return [
+                      date,
+                      {
+                        marked: true,
+                        selected: isSelected,
+                        customStyles: {
+                          container: {
+                            backgroundColor: isSelected
+                              ? "#2E66E7"
+                              : "transparent",
+                            borderWidth: 2,
+                            borderColor: eventStyle?.color || "#2E66E7",
+                            borderRadius: 20,
+                          },
+                          text: {
+                            color: isSelected
+                              ? "white"
+                              : eventStyle?.color || "#2E66E7",
+                            fontWeight: "bold",
+                          },
                         },
-                        text: {
-                          color: isSelected ? 'white' : (eventStyle?.color || '#2E66E7'),
-                          fontWeight: 'bold'
-                        }
-                      }
-                    }];
+                      },
+                    ];
                   } else {
                     // If no app event, use regular styling
-                    return [date, {
-                      marked: true,
-                      selected: isSelected,
-                      selectedColor: '#2E66E7',
-                      dotColor: '#666666'
-                    }];
+                    return [
+                      date,
+                      {
+                        marked: true,
+                        selected: isSelected,
+                        selectedColor: "#2E66E7",
+                        dotColor: "#666666",
+                      },
+                    ];
                   }
                 })
               ),
-              ...(selectedDate && !events.some((event: ExpoCalendar.Event) => {
+              ...(selectedDate &&
+              !events.some((event: ExpoCalendar.Event) => {
                 const eventDate = new Date(event.startDate);
-                return eventDate.toISOString().split('T')[0] === selectedDate;
-              }) ? {
-                [selectedDate]: {
-                  selected: true,
-                  selectedColor: '#2E66E7'
-                }
-              } : {})
+                return eventDate.toISOString().split("T")[0] === selectedDate;
+              })
+                ? {
+                    [selectedDate]: {
+                      selected: true,
+                      selectedColor: "#2E66E7",
+                    },
+                  }
+                : {}),
             }}
             theme={{
-              backgroundColor: '#ffffff',
-              calendarBackground: '#ffffff',
-              textSectionTitleColor: '#2d4150',
-              selectedDayTextColor: '#ffffff',
-              todayTextColor: '#2E66E7',
-              dayTextColor: '#2d4150',
-              textDisabledColor: '#d9e1e8',
-              arrowColor: '#2E66E7',
-              monthTextColor: '#2d4150',
+              backgroundColor: "#ffffff",
+              calendarBackground: "#ffffff",
+              textSectionTitleColor: "#2d4150",
+              selectedDayTextColor: "#ffffff",
+              todayTextColor: "#2E66E7",
+              dayTextColor: "#2d4150",
+              textDisabledColor: "#d9e1e8",
+              arrowColor: "#2E66E7",
+              monthTextColor: "#2d4150",
               textDayFontSize: 16,
               textMonthFontSize: 18,
               textDayHeaderFontSize: 16,
-              textDayFontWeight: '600',
-              textMonthFontWeight: 'bold',
-              textDayHeaderFontWeight: '600'
+              textDayFontWeight: "600",
+              textMonthFontWeight: "bold",
+              textDayHeaderFontWeight: "600",
             }}
             style={{
               height: 370,
               borderWidth: 1,
-              borderColor: '#E5E5E5'
+              borderColor: "#E5E5E5",
             }}
             markingType="custom"
           />
@@ -734,196 +787,246 @@ const eventTypeStyles = {
                 style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}
               >
                 Events for{" "}
-                {new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  }
+                )}
                 :
               </Text>
-              {getEventsForDate(selectedDate).map((event: ExpoCalendar.Event, index: number) => {
-                const isExpanded = expandedEventId === event.id;
-                const isAppEvent = isAppCreatedEvent(event);
-                const { classification, notes } = parseEventDetails(event);
+              {getEventsForDate(selectedDate).map(
+                (event: ExpoCalendar.Event, index: number) => {
+                  const isExpanded = expandedEventId === event.id;
+                  const isAppEvent = isAppCreatedEvent(event);
+                  const { classification, notes } = parseEventDetails(event);
 
-                return (
-                  <TouchableOpacity
-                    key={event.id}
-                    onPress={() => {
-                      console.log("Pressed event:", event.id);
-                      console.log("Current expandedEventId:", expandedEventId);
-                      setExpandedEventId(isExpanded ? null : event.id);
-                    }}
-                    style={[
-                      {
-                        marginBottom: 10,
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        elevation: isAppEvent ? 4 : 2,
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: isAppEvent ? 2 : 1 },
-                        shadowOpacity: isAppEvent ? 0.3 : 0.22,
-                        shadowRadius: isAppEvent ? 4 : 2.22,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: isAppEvent 
-                          ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.backgroundColor || '#f0f0f0')
-                          : '#f0f0f0',
-                        padding: 15,
-                        borderRadius: 6,
-                        borderWidth: isAppEvent ? 2 : 0,
-                        borderColor: isAppEvent 
-                          ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd')
-                          : '#ddd',
+                  return (
+                    <TouchableOpacity
+                      key={event.id}
+                      onPress={() => {
+                        console.log("Pressed event:", event.id);
+                        console.log(
+                          "Current expandedEventId:",
+                          expandedEventId
+                        );
+                        setExpandedEventId(isExpanded ? null : event.id);
                       }}
+                      style={[
+                        {
+                          marginBottom: 10,
+                          borderRadius: 8,
+                          overflow: "hidden",
+                          elevation: isAppEvent ? 4 : 2,
+                          shadowColor: "#000",
+                          shadowOffset: {
+                            width: 0,
+                            height: isAppEvent ? 2 : 1,
+                          },
+                          shadowOpacity: isAppEvent ? 0.3 : 0.22,
+                          shadowRadius: isAppEvent ? 4 : 2.22,
+                        },
+                      ]}
                     >
                       <View
                         style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
+                          backgroundColor: isAppEvent
+                            ? eventTypeStyles[
+                                classification as keyof typeof eventTypeStyles
+                              ]?.backgroundColor || "#f0f0f0"
+                            : "#f0f0f0",
+                          padding: 15,
+                          borderRadius: 6,
+                          borderWidth: isAppEvent ? 2 : 0,
+                          borderColor: isAppEvent
+                            ? eventTypeStyles[
+                                classification as keyof typeof eventTypeStyles
+                              ]?.borderColor || "#ddd"
+                            : "#ddd",
                         }}
                       >
-                        <Text
-                          style={{
-                            fontWeight: isAppEvent ? "800" : "bold",
-                            flex: 1,
-                            fontSize: isAppEvent ? 18 : 16,
-                            color: isAppEvent 
-                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333')
-                              : '#333',
-                          }}
-                        >
-                          {isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.emoji || '🔷') : ""}{" "}
-                          {event.title}
-                        </Text>
-                        <Text
-                          style={{
-                            color: isAppEvent 
-                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#666')
-                              : '#666',
-                            fontSize: 14,
-                            fontWeight: isAppEvent ? "600" : "normal",
-                          }}
-                        >
-                          {formatEventTime(new Date(event.startDate))}
-                        </Text>
-                      </View>
-
-                      {isExpanded && (
                         <View
                           style={{
-                            marginTop: 10,
-                            paddingTop: 10,
-                            borderTopWidth: 1,
-                            borderTopColor: isAppEvent 
-                              ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd')
-                              : '#ddd',
-                            backgroundColor: isAppEvent ? '#FFFFFF' : undefined,
-                            padding: isAppEvent ? 12 : 0,
-                            borderRadius: isAppEvent ? 6 : 0,
-                            borderWidth: isAppEvent ? 1 : 0,
-                            borderColor: eventTypeStyles[classification as keyof typeof eventTypeStyles]?.borderColor || '#ddd',
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                           }}
                         >
-                          {isAppEvent && (
-                            <Text
-                              style={{
-                                marginBottom: 8,
-                                color: eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333',
-                                fontSize: 15,
-                                fontWeight: "600",
-                              }}
-                            >
-                              {eventTypeStyles[classification as keyof typeof eventTypeStyles]?.emoji || ''}
-                              {" Type: "}{EventClassification.find(c => c.value === classification)?.label || classification}
-                            </Text>
-                          )}
-                          
-                          {notes && (
-                            <Text
-                              style={{
-                                marginBottom: 8,
-                                color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#333',
-                                fontSize: isAppEvent ? 16 : 14,
-                                fontWeight: isAppEvent ? "600" : "normal",
-                              }}
-                            >
-                              {notes}
-                            </Text>
-                          )}
-                          
                           <Text
                             style={{
-                              color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#666',
-                              fontSize: isAppEvent ? 15 : 14,
-                              fontWeight: isAppEvent ? "600" : "normal",
-                              marginTop: isAppEvent ? 8 : 0,
+                              fontWeight: isAppEvent ? "800" : "bold",
+                              flex: 1,
+                              fontSize: isAppEvent ? 18 : 16,
+                              color: isAppEvent
+                                ? eventTypeStyles[
+                                    classification as keyof typeof eventTypeStyles
+                                  ]?.color || "#333"
+                                : "#333",
                             }}
                           >
-                            ⏰ {formatEventTime(new Date(event.startDate))} -{" "}
-                            {formatEventTime(new Date(event.endDate))}
+                            {isAppEvent
+                              ? eventTypeStyles[
+                                  classification as keyof typeof eventTypeStyles
+                                ]?.emoji || "🔷"
+                              : ""}{" "}
+                            {event.title}
                           </Text>
-                          {event.location && (
-                            <Text
-                              style={{
-                                marginTop: 8,
-                                color: isAppEvent ? (eventTypeStyles[classification as keyof typeof eventTypeStyles]?.color || '#333') : '#666',
-                                fontSize: isAppEvent ? 15 : 14,
-                                fontWeight: isAppEvent ? "600" : "normal",
-                              }}
-                            >
-                              📍 {event.location}
-                            </Text>
-                          )}
+                          <Text
+                            style={{
+                              color: isAppEvent
+                                ? eventTypeStyles[
+                                    classification as keyof typeof eventTypeStyles
+                                  ]?.color || "#666"
+                                : "#666",
+                              fontSize: 14,
+                              fontWeight: isAppEvent ? "600" : "normal",
+                            }}
+                          >
+                            {formatEventTime(new Date(event.startDate))}
+                          </Text>
+                        </View>
 
-                          {isAppEvent && (
-                            <TouchableOpacity
-                              onPress={() => {
-                                Alert.alert(
-                                  "Delete Event",
-                                  "Are you sure you want to delete this event?",
-                                  [
-                                    {
-                                      text: "Cancel",
-                                      style: "cancel",
-                                    },
-                                    {
-                                      text: "Delete",
-                                      onPress: () => deleteEvent(event.id),
-                                      style: "destructive",
-                                    },
-                                  ]
-                                );
-                              }}
-                              style={{
-                                backgroundColor: '#ff4444',
-                                padding: 10,
-                                borderRadius: 6,
-                                marginTop: 12,
-                                alignItems: "center",
-                              }}
-                            >
+                        {isExpanded && (
+                          <View
+                            style={{
+                              marginTop: 10,
+                              paddingTop: 10,
+                              borderTopWidth: 1,
+                              borderTopColor: isAppEvent
+                                ? eventTypeStyles[
+                                    classification as keyof typeof eventTypeStyles
+                                  ]?.borderColor || "#ddd"
+                                : "#ddd",
+                              backgroundColor: isAppEvent
+                                ? "#FFFFFF"
+                                : undefined,
+                              padding: isAppEvent ? 12 : 0,
+                              borderRadius: isAppEvent ? 6 : 0,
+                              borderWidth: isAppEvent ? 1 : 0,
+                              borderColor:
+                                eventTypeStyles[
+                                  classification as keyof typeof eventTypeStyles
+                                ]?.borderColor || "#ddd",
+                            }}
+                          >
+                            {isAppEvent && (
                               <Text
                                 style={{
-                                  color: "white",
+                                  marginBottom: 8,
+                                  color:
+                                    eventTypeStyles[
+                                      classification as keyof typeof eventTypeStyles
+                                    ]?.color || "#333",
+                                  fontSize: 15,
                                   fontWeight: "600",
-                                  fontSize: 14,
                                 }}
                               >
-                                Delete Event
+                                {eventTypeStyles[
+                                  classification as keyof typeof eventTypeStyles
+                                ]?.emoji || ""}
+                                {" Type: "}
+                                {EventClassification.find(
+                                  (c) => c.value === classification
+                                )?.label || classification}
                               </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+                            )}
+
+                            {notes && (
+                              <Text
+                                style={{
+                                  marginBottom: 8,
+                                  color: isAppEvent
+                                    ? eventTypeStyles[
+                                        classification as keyof typeof eventTypeStyles
+                                      ]?.color || "#333"
+                                    : "#333",
+                                  fontSize: isAppEvent ? 16 : 14,
+                                  fontWeight: isAppEvent ? "600" : "normal",
+                                }}
+                              >
+                                {notes}
+                              </Text>
+                            )}
+
+                            <Text
+                              style={{
+                                color: isAppEvent
+                                  ? eventTypeStyles[
+                                      classification as keyof typeof eventTypeStyles
+                                    ]?.color || "#333"
+                                  : "#666",
+                                fontSize: isAppEvent ? 15 : 14,
+                                fontWeight: isAppEvent ? "600" : "normal",
+                                marginTop: isAppEvent ? 8 : 0,
+                              }}
+                            >
+                              ⏰ {formatEventTime(new Date(event.startDate))} -{" "}
+                              {formatEventTime(new Date(event.endDate))}
+                            </Text>
+                            {event.location && (
+                              <Text
+                                style={{
+                                  marginTop: 8,
+                                  color: isAppEvent
+                                    ? eventTypeStyles[
+                                        classification as keyof typeof eventTypeStyles
+                                      ]?.color || "#333"
+                                    : "#666",
+                                  fontSize: isAppEvent ? 15 : 14,
+                                  fontWeight: isAppEvent ? "600" : "normal",
+                                }}
+                              >
+                                📍 {event.location}
+                              </Text>
+                            )}
+
+                            {isAppEvent && (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  Alert.alert(
+                                    "Delete Event",
+                                    "Are you sure you want to delete this event?",
+                                    [
+                                      {
+                                        text: "Cancel",
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "Delete",
+                                        onPress: () => deleteEvent(event.id),
+                                        style: "destructive",
+                                      },
+                                    ]
+                                  );
+                                }}
+                                style={{
+                                  backgroundColor: "#ff4444",
+                                  padding: 10,
+                                  borderRadius: 6,
+                                  marginTop: 12,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    color: "white",
+                                    fontWeight: "600",
+                                    fontSize: 14,
+                                  }}
+                                >
+                                  Delete Event
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }
+              )}
               {getEventsForDate(selectedDate).length === 0 && (
                 <Text>No events for this date</Text>
               )}
@@ -936,12 +1039,12 @@ const eventTypeStyles = {
           visible={showDatePickerModal && isFollowUpScheduling}
           animationType="none"
           transparent={true}
-          onShow={() => console.log('Modal onShow triggered')}
+          onShow={() => console.log("Modal onShow triggered")}
           statusBarTranslucent={true}
         >
-          <Pressable 
+          <Pressable
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
@@ -956,13 +1059,13 @@ const eventTypeStyles = {
               setIsFollowUpScheduling(false);
             }}
           >
-            <Pressable 
+            <Pressable
               style={{
                 backgroundColor: "white",
-                width: '90%',
+                width: "90%",
                 padding: 20,
                 borderRadius: 10,
-                maxHeight: '90%',
+                maxHeight: "90%",
                 shadowColor: "#000",
                 shadowOffset: {
                   width: 0,
@@ -976,22 +1079,26 @@ const eventTypeStyles = {
                 e.stopPropagation();
               }}
             >
-              <Text style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                marginBottom: 10,
-                textAlign: "center",
-                color: '#50C878'
-              }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  marginBottom: 10,
+                  textAlign: "center",
+                  color: "#50C878",
+                }}
+              >
                 Schedule Follow-up Reminder
               </Text>
-              
-              <Text style={{
-                fontSize: 16,
-                color: '#666',
-                textAlign: 'center',
-                marginBottom: 20,
-              }}>
+
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#666",
+                  textAlign: "center",
+                  marginBottom: 20,
+                }}
+              >
                 Select the date of your initial appointment
               </Text>
 
@@ -1003,67 +1110,76 @@ const eventTypeStyles = {
                 markedDates={{
                   [selectedEventDate]: {
                     selected: true,
-                    selectedColor: '#50C878',
+                    selectedColor: "#50C878",
                   },
                 }}
                 style={{
                   borderRadius: 10,
                   borderWidth: 1,
-                  borderColor: '#E5E5E5',
+                  borderColor: "#E5E5E5",
                   marginBottom: 20,
                 }}
                 theme={{
-                  backgroundColor: '#ffffff',
-                  calendarBackground: '#ffffff',
-                  selectedDayBackgroundColor: '#50C878',
-                  selectedDayTextColor: '#ffffff',
-                  todayTextColor: '#50C878',
-                  dayTextColor: '#2d4150',
-                  textDisabledColor: '#d9e1e8',
-                  dotColor: '#50C878',
-                  selectedDotColor: '#ffffff',
-                  arrowColor: '#50C878',
-                  monthTextColor: '#2d4150',
+                  backgroundColor: "#ffffff",
+                  calendarBackground: "#ffffff",
+                  selectedDayBackgroundColor: "#50C878",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#50C878",
+                  dayTextColor: "#2d4150",
+                  textDisabledColor: "#d9e1e8",
+                  dotColor: "#50C878",
+                  selectedDotColor: "#ffffff",
+                  arrowColor: "#50C878",
+                  monthTextColor: "#2d4150",
                   textDayFontSize: 16,
                   textMonthFontSize: 18,
-                  textDayHeaderFontSize: 14
+                  textDayHeaderFontSize: 14,
                 }}
               />
 
-              <View style={{
-                backgroundColor: '#f8f9fa',
-                padding: 15,
-                borderRadius: 8,
-                marginBottom: 20,
-                borderWidth: 1,
-                borderColor: '#dee2e6',
-              }}>
-                <Text style={{
-                  fontSize: 16,
-                  color: '#2d4150',
-                  textAlign: 'center',
-                  marginBottom: 8,
-                }}>
+              <View
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: 15,
+                  borderRadius: 8,
+                  marginBottom: 20,
+                  borderWidth: 1,
+                  borderColor: "#dee2e6",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: "#2d4150",
+                    textAlign: "center",
+                    marginBottom: 8,
+                  }}
+                >
                   Initial Appointment: {formatDate(selectedEventDate)}
                 </Text>
-                <Text style={{
-                  fontSize: 14,
-                  color: '#666',
-                  textAlign: 'center',
-                }}>
-                  Follow-up Reminder: {(() => {
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: "#666",
+                    textAlign: "center",
+                  }}
+                >
+                  Follow-up Reminder:{" "}
+                  {(() => {
                     const followUpDate = new Date(selectedEventDate);
                     followUpDate.setMonth(followUpDate.getMonth() + 6);
-                    return formatDate(followUpDate.toISOString().split('T')[0]);
+                    return formatDate(followUpDate.toISOString().split("T")[0]);
                   })()}
                 </Text>
               </View>
 
-              <View style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 20,
-              }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 20,
+                }}
+              >
                 <TouchableOpacity
                   onPress={() => {
                     setShowDatePickerModal(false);
@@ -1078,16 +1194,18 @@ const eventTypeStyles = {
                     marginRight: 10,
                     borderWidth: 1,
                     borderColor: "#dee2e6",
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <Text style={{
-                    color: "#495057",
-                    fontSize: 16,
-                    textAlign: "center",
-                    fontWeight: "600",
-                  }}>
+                  <Text
+                    style={{
+                      color: "#495057",
+                      fontSize: 16,
+                      textAlign: "center",
+                      fontWeight: "600",
+                    }}
+                  >
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -1109,16 +1227,18 @@ const eventTypeStyles = {
                     },
                     shadowOpacity: 0.2,
                     shadowRadius: 1.41,
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <Text style={{
-                    color: "white",
-                    fontSize: 16,
-                    textAlign: "center",
-                    fontWeight: "600",
-                  }}>
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 16,
+                      textAlign: "center",
+                      fontWeight: "600",
+                    }}
+                  >
                     Schedule Reminder
                   </Text>
                 </TouchableOpacity>
@@ -1132,19 +1252,23 @@ const eventTypeStyles = {
           animationType="slide"
           transparent={true}
         >
-          <View style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}>
-            <View style={{
-              backgroundColor: "white",
-              margin: 20,
-              padding: 20,
-              borderRadius: 10,
-              zIndex: 1001,
-            }}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "center",
+              zIndex: 1000,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                margin: 20,
+                padding: 20,
+                borderRadius: 10,
+                zIndex: 1001,
+              }}
+            >
               <Text
                 style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}
               >
@@ -1208,10 +1332,10 @@ const eventTypeStyles = {
                     borderColor: "#ddd",
                     padding: 15,
                     borderRadius: 5,
-                    backgroundColor: '#f8f9fa',
+                    backgroundColor: "#f8f9fa",
                   }}
                 >
-                  <Text style={{ color: '#2d4150', fontSize: 16 }}>
+                  <Text style={{ color: "#2d4150", fontSize: 16 }}>
                     📅 {formatDate(selectedEventDate)}
                   </Text>
                 </TouchableOpacity>
@@ -1265,7 +1389,9 @@ const eventTypeStyles = {
                   <Text>
                     {selectedAlerts.length === 0
                       ? "No reminders set"
-                      : `${selectedAlerts.length} reminder${selectedAlerts.length !== 1 ? 's' : ''} set`}
+                      : `${selectedAlerts.length} reminder${
+                          selectedAlerts.length !== 1 ? "s" : ""
+                        } set`}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1282,7 +1408,9 @@ const eventTypeStyles = {
                   }}
                 >
                   <Text>
-                    {EventClassification.find(c => c.value === newEvent.classification)?.label || "Select type"}
+                    {EventClassification.find(
+                      (c) => c.value === newEvent.classification
+                    )?.label || "Select type"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1302,7 +1430,7 @@ const eventTypeStyles = {
                     setShowDatePickerModal(false);
                     setShowReminderModal(false);
                     setShowErrorModal(false);
-                    
+
                     // Reset form states
                     setNewEvent({
                       title: "",
@@ -1313,13 +1441,15 @@ const eventTypeStyles = {
                       classification: "personal",
                     });
                     setSelectedAlerts(["15"]);
-                  
-                    setSelectedEventDate(new Date().toISOString().split("T")[0]);
-                    
+
+                    setSelectedEventDate(
+                      new Date().toISOString().split("T")[0]
+                    );
+
                     // Reset time states
                     setStartPeriod("AM");
                     setEndPeriod("AM");
-                    
+
                     // Reset any error state
                     setErrorMessage("");
                   }}
@@ -1540,45 +1670,53 @@ const eventTypeStyles = {
                 transparent={true}
                 onRequestClose={() => setShowReminderModal(false)}
               >
-                <View style={{
-                  flex: 1,
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  zIndex: 9999,
-                }}>
-                  <View style={{
-                    backgroundColor: "white",
-                    width: '90%',
-                    padding: 20,
-                    borderRadius: 10,
-                    maxHeight: '80%',
-                    elevation: 5,
-                    shadowColor: "#000",
-                    shadowOffset: {
-                      width: 0,
-                      height: 2,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                  }}>
-                    <Text style={{
-                      fontSize: 20,
-                      fontWeight: "bold",
-                      marginBottom: 20,
-                      textAlign: "center",
-                      color: '#2d4150'
-                    }}>
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 9999,
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: "white",
+                      width: "90%",
+                      padding: 20,
+                      borderRadius: 10,
+                      maxHeight: "80%",
+                      elevation: 5,
+                      shadowColor: "#000",
+                      shadowOffset: {
+                        width: 0,
+                        height: 2,
+                      },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+                        marginBottom: 20,
+                        textAlign: "center",
+                        color: "#2d4150",
+                      }}
+                    >
                       Set Event Reminders
                     </Text>
 
-                    <Text style={{
-                      fontSize: 16,
-                      marginBottom: 15,
-                      color: '#666',
-                      textAlign: 'center',
-                      lineHeight: 24,
-                    }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        marginBottom: 15,
+                        color: "#666",
+                        textAlign: "center",
+                        lineHeight: 24,
+                      }}
+                    >
                       Select when you would like to be reminded about this event
                     </Text>
 
@@ -1593,32 +1731,44 @@ const eventTypeStyles = {
                             padding: 15,
                             borderBottomWidth: 1,
                             borderBottomColor: "#eee",
-                            backgroundColor: selectedAlerts.includes(option.value) ? '#f0f8ff' : 'white',
+                            backgroundColor: selectedAlerts.includes(
+                              option.value
+                            )
+                              ? "#f0f8ff"
+                              : "white",
                           }}
                         >
-                          <View style={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: 12,
-                            borderWidth: 2,
-                            borderColor: "#2E66E7",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginRight: 15,
-                          }}>
+                          <View
+                            style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 12,
+                              borderWidth: 2,
+                              borderColor: "#2E66E7",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              marginRight: 15,
+                            }}
+                          >
                             {selectedAlerts.includes(option.value) && (
-                              <View style={{
-                                width: 12,
-                                height: 12,
-                                borderRadius: 6,
-                                backgroundColor: "#2E66E7",
-                              }} />
+                              <View
+                                style={{
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 6,
+                                  backgroundColor: "#2E66E7",
+                                }}
+                              />
                             )}
                           </View>
-                          <Text style={{ 
-                            fontSize: 16,
-                            color: selectedAlerts.includes(option.value) ? '#2E66E7' : '#333',
-                          }}>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              color: selectedAlerts.includes(option.value)
+                                ? "#2E66E7"
+                                : "#333",
+                            }}
+                          >
                             {option.label}
                           </Text>
                         </TouchableOpacity>
@@ -1635,7 +1785,13 @@ const eventTypeStyles = {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 16,
+                          fontWeight: "600",
+                        }}
+                      >
                         Confirm Reminders
                       </Text>
                     </TouchableOpacity>
@@ -1679,7 +1835,10 @@ const eventTypeStyles = {
                       <TouchableOpacity
                         key={option.value}
                         onPress={() => {
-                          setNewEvent({ ...newEvent, classification: option.value });
+                          setNewEvent({
+                            ...newEvent,
+                            classification: option.value,
+                          });
                           setSelectedClassification(option.value);
                           setShowClassificationModal(false);
                         }}
@@ -1689,7 +1848,10 @@ const eventTypeStyles = {
                           padding: 20,
                           borderBottomWidth: 1,
                           borderBottomColor: "#eee",
-                          backgroundColor: newEvent.classification === option.value ? '#f0f8ff' : 'white',
+                          backgroundColor:
+                            newEvent.classification === option.value
+                              ? "#f0f8ff"
+                              : "white",
                         }}
                       >
                         <View
@@ -1715,10 +1877,15 @@ const eventTypeStyles = {
                             />
                           )}
                         </View>
-                        <Text style={{ 
-                          fontSize: 18,
-                          color: newEvent.classification === option.value ? '#2E66E7' : '#333',
-                        }}>
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            color:
+                              newEvent.classification === option.value
+                                ? "#2E66E7"
+                                : "#333",
+                          }}
+                        >
                           {option.label}
                         </Text>
                       </TouchableOpacity>
@@ -1734,7 +1901,13 @@ const eventTypeStyles = {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 16,
+                          fontWeight: "600",
+                        }}
+                      >
                         Cancel
                       </Text>
                     </TouchableOpacity>
@@ -1749,9 +1922,9 @@ const eventTypeStyles = {
                 transparent={true}
                 statusBarTranslucent={true}
               >
-                <Pressable 
+                <Pressable
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
@@ -1762,13 +1935,13 @@ const eventTypeStyles = {
                   }}
                   onPress={() => setShowDatePickerModal(false)}
                 >
-                  <Pressable 
+                  <Pressable
                     style={{
                       backgroundColor: "white",
-                      width: '90%',
+                      width: "90%",
                       padding: 20,
                       borderRadius: 10,
-                      maxHeight: '90%',
+                      maxHeight: "90%",
                       shadowColor: "#000",
                       shadowOffset: {
                         width: 0,
@@ -1779,13 +1952,15 @@ const eventTypeStyles = {
                     }}
                     onPress={(e) => e.stopPropagation()}
                   >
-                    <Text style={{
-                      fontSize: 20,
-                      fontWeight: "bold",
-                      marginBottom: 10,
-                      textAlign: "center",
-                      color: '#2E66E7'
-                    }}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+                        marginBottom: 10,
+                        textAlign: "center",
+                        color: "#2E66E7",
+                      }}
+                    >
                       Select Event Date
                     </Text>
 
@@ -1798,30 +1973,30 @@ const eventTypeStyles = {
                       markedDates={{
                         [selectedEventDate]: {
                           selected: true,
-                          selectedColor: '#2E66E7',
+                          selectedColor: "#2E66E7",
                         },
                       }}
                       style={{
                         borderRadius: 10,
                         borderWidth: 1,
-                        borderColor: '#E5E5E5',
+                        borderColor: "#E5E5E5",
                         marginBottom: 20,
                       }}
                       theme={{
-                        backgroundColor: '#ffffff',
-                        calendarBackground: '#ffffff',
-                        selectedDayBackgroundColor: '#2E66E7',
-                        selectedDayTextColor: '#ffffff',
-                        todayTextColor: '#2E66E7',
-                        dayTextColor: '#2d4150',
-                        textDisabledColor: '#d9e1e8',
-                        dotColor: '#2E66E7',
-                        selectedDotColor: '#ffffff',
-                        arrowColor: '#2E66E7',
-                        monthTextColor: '#2d4150',
+                        backgroundColor: "#ffffff",
+                        calendarBackground: "#ffffff",
+                        selectedDayBackgroundColor: "#2E66E7",
+                        selectedDayTextColor: "#ffffff",
+                        todayTextColor: "#2E66E7",
+                        dayTextColor: "#2d4150",
+                        textDisabledColor: "#d9e1e8",
+                        dotColor: "#2E66E7",
+                        selectedDotColor: "#ffffff",
+                        arrowColor: "#2E66E7",
+                        monthTextColor: "#2d4150",
                         textDayFontSize: 16,
                         textMonthFontSize: 18,
-                        textDayHeaderFontSize: 14
+                        textDayHeaderFontSize: 14,
                       }}
                     />
                   </Pressable>
@@ -1838,8 +2013,7 @@ const eventTypeStyles = {
 const styles = StyleSheet.create({
   calendar: {
     borderWidth: 1,
-    borderColor: '#E5E5E5',
-    height: 370
+    borderColor: "#E5E5E5",
+    height: 370,
   },
 });
-

@@ -34,7 +34,7 @@ const ClaimPointsModal = ({
               style={[styles.button, styles.claimButton]}
               onPress={onClaimPoints}
             >
-              <Text style={styles.buttonText}>CLAIM POINTS</Text>
+              <Text style={styles.buttonText}>CLOSE</Text>
             </Pressable>
           </View>
         </View>
