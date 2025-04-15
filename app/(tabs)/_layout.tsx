@@ -142,6 +142,15 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+        name="surveyphoto"
+        options={{
+          title: "EyeScreen",
+          tabBarIcon: ({ color }) => (
+            <Feather name="file-plus" size={24} color={color} />
+          ),
+        }}
+      />
+        <Tabs.Screen
           name="Education"
           options={{
             title: "Learn",
