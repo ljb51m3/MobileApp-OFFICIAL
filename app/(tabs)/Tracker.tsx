@@ -741,15 +741,14 @@ const Tracker: React.FC = () => {
                     ? formatDate(currentLog.date)
                     : "Select a date"}
                 </Text>
+                <View style={styles.chevronContainer}>
+                  <Ionicons
+                    name={showCalendar ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color="#095da7"
+                  />
+                </View>
               </TouchableOpacity>
-
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name={showCalendar ? "chevron-down" : "chevron-up"}
-                  size={20}
-                  color="#095da7"
-                />
-              </View>
 
               <TouchableOpacity onPress={goToNextLog}>
                 <Ionicons name="chevron-forward" size={28} color="#095da7" />
@@ -775,14 +774,33 @@ const Tracker: React.FC = () => {
                     calendarBackground: "#fff",
                     selectedDayBackgroundColor: "#095da7",
                     selectedDayTextColor: "#fff",
-                    todayTextColor: "#095da7",
-                    dayTextColor: "#333",
-                    textDisabledColor: "#ddd",
+                    todayTextColor: "#ff6b6b",
+                    dayTextColor: "#2d4150",
+                    textDisabledColor: "#d9e1e8",
+                    dotColor: "#ff4757",
+                    selectedDotColor: "#fff",
                     arrowColor: "#095da7",
-                    monthTextColor: "#333",
+                    monthTextColor: "#095da7",
+                    indicatorColor: "#095da7",
+                    textDayFontFamily: "System",
+                    textMonthFontFamily: "System",
+                    textDayHeaderFontFamily: "System",
+                    textDayFontWeight: "500",
                     textMonthFontWeight: "bold",
-                    textDayFontSize: 14,
-                    textMonthFontSize: 16,
+                    textDayHeaderFontWeight: "500",
+                    textDayFontSize: 15,
+                    textMonthFontSize: 18,
+                    textDayHeaderFontSize: 14,
+                    "stylesheet.calendar.header": {
+                      header: {
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        marginTop: 6,
+                        alignItems: "center",
+                      },
+                    },
                   }}
                 />
               </View>
@@ -904,23 +922,36 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
+    width: "90%",
+    maxWidth: 400,
     padding: 20,
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    fontWeight: "600",
+    color: "#095da7",
+    textAlign: "center",
+    marginHorizontal: 10,
   },
   closeButton: {
     marginTop: 20,
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
     backgroundColor: "#095da7",
-    borderRadius: 5,
+    borderRadius: 8,
+    shadowColor: "#095da7",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   closeButtonText: {
     color: "#fff",
@@ -943,7 +974,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 15,
+    paddingHorizontal: 5,
   },
   logContent: {
     width: "100%",
@@ -1028,24 +1060,34 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   dateSelector: {
+    flexDirection: "row",
     alignItems: "center",
-    padding: 8,
-    backgroundColor: "#eee",
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    marginHorizontal: 10,
+    minWidth: 200,
+    justifyContent: "center",
   },
   calendarContainer: {
     width: "100%",
     marginBottom: 15,
-    borderRadius: 10,
+    borderRadius: 15,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e0e0e0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    backgroundColor: "white",
   },
-  iconContainer: {
-    alignItems: "center",
-    padding: 8,
-    backgroundColor: "#eee",
-    borderRadius: 8,
+  chevronContainer: {
+    marginLeft: 8,
   },
 });
 

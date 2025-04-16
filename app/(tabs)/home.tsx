@@ -352,7 +352,7 @@ export default function HomeScreen() {
           <View style={styles.headerContainer}>
             <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
             <View style={styles.pointsContainer}>
-              <Text style={styles.pointsText}>{points} pts</Text>
+              <Text style={styles.pointsText}>💰 {points} pts</Text>
             </View>
           </View>
           {dailyTasks.map((task) => (
@@ -796,23 +796,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
   },
   pointsContainer: {
-    alignSelf: "flex-start",
-    backgroundColor: "#095da7",
-    borderWidth: 2,
-    borderColor: "#095da7",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 15,
-    elevation: 3,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 20,
+    alignSelf: "flex-end",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
   },
   pointsText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#095da7",
   },
   pointsLabel: {
     fontSize: 14,
