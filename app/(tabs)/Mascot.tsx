@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     paddingLeft: 20,
     paddingBottom: 50,
+    height: 500,
   },
   itemContainer: {
     flex: 1,
