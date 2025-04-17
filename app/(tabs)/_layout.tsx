@@ -125,7 +125,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="Mascot"
           options={{
-            title: "Mascot",
+            title: "Your Pet",
             tabBarIcon: ({ color }) => (
               <Feather name="eye" size={32} color={color} />
             ),
@@ -142,14 +142,14 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-        name="surveyphoto"
-        options={{
-          title: "EyeScreen",
-          tabBarIcon: ({ color }) => (
-            <Feather name="file-plus" size={24} color={color} />
-          ),
-        }}
-      />
+          name="surveyphoto"
+          options={{
+            title: "EyeScreen",
+            tabBarIcon: ({ color }) => (
+              <Feather name="file-plus" size={24} color={color} />
+            ),
+          }}
+        />
         <Tabs.Screen
           name="Education"
           options={{
