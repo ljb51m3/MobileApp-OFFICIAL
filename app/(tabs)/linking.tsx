@@ -22,31 +22,42 @@ const CombinedScreen = () => {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === "Tracker" && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === "Tracker" && styles.activeTab,
+          ]}
           onPress={() => setSelectedTab("Tracker")}
         >
           <Text style={styles.tabText}>Daily Tracker</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === "Links" && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === "Links" && styles.activeTab,
+          ]}
           onPress={() => setSelectedTab("Links")}
         >
           <Text style={styles.tabText}>Health Links</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style = {[styles.tabButton, selectedTab === "Eye Survey" && styles.activeTab]}
-          onPress = {() => setSelectedTab("Eye Survey")}
+          style={[
+            styles.tabButton,
+            selectedTab === "Eye Survey" && styles.activeTab,
+          ]}
+          onPress={() => setSelectedTab("Eye Survey")}
         >
-          <Text style = {styles.tabText}>Eye Survey</Text>
+          <Text style={styles.tabText}>Eye Survey</Text>
         </TouchableOpacity>
       </View>
-
       {selectedTab === "Tracker" ? (
         <>
           {/* Render the Tracker component */}
           <Tracker />
 
-          <TouchableOpacity style={styles.bookIcon} onPress={() => setModalVisible(true)}>
+          <TouchableOpacity
+            style={styles.bookIcon}
+            onPress={() => setModalVisible(true)}
+          >
             <Ionicons name="book" size={32} color="#095da7" />
           </TouchableOpacity>
 
@@ -59,7 +70,10 @@ const CombinedScreen = () => {
                 <Text>Eating: {/* Add dynamic eating log here */}</Text>
                 <Text>Exercise: {/* Add dynamic exercise log here */}</Text>
 
-                <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                <Pressable
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
                   <Text style={styles.closeButtonText}>Close</Text>
                 </Pressable>
               </View>
@@ -77,7 +91,11 @@ const CombinedScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => router.push("https://mychart.bilh.org/MyChart-BILH/Authentication/Login?")}
+            onPress={() =>
+              router.push(
+                "https://mychart.bilh.org/MyChart-BILH/Authentication/Login?"
+              )
+            }
             style={[styles.linkButton, { backgroundColor: "#c4eaff" }]}
           >
             <Text style={styles.buttonText}>Visit MyBILH</Text>
@@ -85,7 +103,8 @@ const CombinedScreen = () => {
         </>
       ) : selectedTab === "Eye Survey" ? (
         <EyeSurvey />
-      ): null};
+      ) : null}
+      ;
     </View>
   );
 };

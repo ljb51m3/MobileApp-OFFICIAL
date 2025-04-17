@@ -13,9 +13,9 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 import { toZonedTime, format as tzFormat } from "date-fns-tz";
-import { usePoints } from "../../components/PointsSystem";
-import TotalPoints from "../../components/TotalPoints";
-import ClaimPointsModal from "../../components/ClaimPointsModal";
+import { usePoints } from "../components/PointsSystem";
+import TotalPoints from "../components/TotalPoints";
+import ClaimPointsModal from "../components/ClaimPointsModal";
 import { Calendar } from "react-native-calendars";
 
 interface Log {
