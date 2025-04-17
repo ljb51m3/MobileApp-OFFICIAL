@@ -664,27 +664,16 @@ export default function CalendarScreen() {
               justifyContent: "space-between",
             }}
           >
-            <View>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: "#2E66E7",
-                  marginBottom: 4,
-                }}
-              >
-                Add New Event
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#666",
-                }}
-              >
-                Schedule a new calendar event
-              </Text>
-            </View>
-            <Text style={{ fontSize: 20, color: "#2E66E7" }}>📅</Text>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: "#2E66E7",
+              }}
+            >
+              Add New Event
+            </Text>
+            <Text style={{ fontSize: 24, color: "#2E66E7" }}>📅</Text>
           </TouchableOpacity>
 
           {/* Reminder Scheduler Button */}
@@ -703,27 +692,16 @@ export default function CalendarScreen() {
               justifyContent: "space-between",
             }}
           >
-            <View>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: "#2E66E7",
-                  marginBottom: 4,
-                }}
-              >
-                Schedule Future Reminders
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#666",
-                }}
-              >
-                Set reminders for upcoming appointments
-              </Text>
-            </View>
-            <Text style={{ fontSize: 20, color: "#2E66E7" }}>⏰</Text>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: "#2E66E7",
+              }}
+            >
+              Schedule Future Reminders
+            </Text>
+            <Text style={{ fontSize: 24, color: "#2E66E7" }}>⏰</Text>
           </TouchableOpacity>
 
           <Calendar

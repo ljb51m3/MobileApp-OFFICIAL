@@ -13,9 +13,9 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 import { toZonedTime, format as tzFormat } from "date-fns-tz";
-import { usePoints } from "../../components/PointsSystem";
-import TotalPoints from "../../components/TotalPoints";
-import ClaimPointsModal from "../../components/ClaimPointsModal";
+import { usePoints } from "../components/PointsSystem";
+import TotalPoints from "../components/TotalPoints";
+import ClaimPointsModal from "../components/ClaimPointsModal";
 import { Calendar } from "react-native-calendars";
 
 interface Log {
@@ -55,7 +55,7 @@ const Tracker: React.FC = () => {
           const parsedLogs: Log[] = JSON.parse(savedLogs);
           setLogs(parsedLogs);
 
-          const marked = {};
+          const marked: { [key: string]: { marked: boolean; dotColor: string } } = {};
           parsedLogs.forEach((log) => {
             marked[log.date] = {
               marked: true,
@@ -191,8 +191,7 @@ const Tracker: React.FC = () => {
     if (!updatedLogs[index].viewed) {
       updatedLogs[index].viewed = true;
       setLogs(updatedLogs);
-
-      const updatedMarkedDates = { ...markedDates };
+      const updatedMarkedDates: Record<string, { dotColor: string }> = { ...markedDates };
       updatedMarkedDates[updatedLogs[index].date] = {
         ...updatedMarkedDates[updatedLogs[index].date],
         dotColor: "#999",
