@@ -97,20 +97,8 @@ export default function WelcomeScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push("/welcome/signup")}
-          style={styles.button}
-        >
-          <Text style={{ fontSize: 16, color: "#0f3180", fontWeight: "bold" }}>
-            Register
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push("/(tabs)/home")}
-          style={styles.button}
-        >
-          <Text style={{ fontSize: 16, color: "#ff00bf", fontWeight: "bold" }}>
+        <TouchableOpacity onPress={() => router.push("/(tabs)/home")}>
+          <Text style={{ fontSize: 16, color: "#fff", fontWeight: "bold" }}>
             dev only
           </Text>
         </TouchableOpacity>

@@ -540,7 +540,7 @@ export default function AppleAuth() {
             <Text
               style={{
                 fontSize: 20,
-                color: "blue",
+                color: "#fff",
                 margin: 20,
                 textAlign: "center",
               }}
