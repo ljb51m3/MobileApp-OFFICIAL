@@ -217,37 +217,37 @@ const ACCESSORIES: PetAccessory[] = [
   {
     id: "1",
     name: "Top Hat",
-    price: 1,
+    price: 20,
     image: require("../assets/images/TopHat2.png"),
   },
   {
     id: "2",
     name: "Monocle",
-    price: 1,
+    price: 15,
     image: require("../assets/images/Monocle.png"),
   },
   {
     id: "3",
     name: "Bow Tie",
-    price: 1,
+    price: 10,
     image: require("../assets/images/BowTie.png"),
   },
   {
     id: "4",
     name: "Bedhead",
-    price: 1,
+    price: 30,
     image: require("../assets/images/BlackHair.png"),
   },
   {
     id: "5",
     name: "Business Man",
-    price: 1,
+    price: 35,
     image: require("../assets/images/BlondeHair.png"),
   },
   {
     id: "6",
     name: "Cowboy",
-    price: 1,
+    price: 40,
     image: require("../assets/images/CowboyHat.png"),
   },
 ];

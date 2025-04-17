@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 10,
-    height: 630,
+    height: 530,
     margin: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   },
   bookIcon: {
     position: "absolute",
-    bottom: 110,
+    bottom: 20,
     right: 20,
     backgroundColor: "#fff",
     borderRadius: 50,
