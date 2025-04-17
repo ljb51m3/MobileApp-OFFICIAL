@@ -276,6 +276,7 @@ const SurveyPhoto = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+
         <View style={styles.pageButtons}>
           <TouchableOpacity
             onPress={() => setCurrentPage(1)}
