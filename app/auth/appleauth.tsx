@@ -28,16 +28,22 @@ export default function AppleAuth() {
   const router = useRouter();
   const [user, setUser] =
     useState<AppleAuthentication.AppleAuthenticationCredential | null>(null);
+  const [firstName, setFirstName] = useState<string>("");
 
   useEffect(() => {
     const checkStoredCredential = async () => {
       const storedCredential = await SecureStore.getItemAsync(
         "appleCredential"
       );
+      const storedName = await SecureStore.getItemAsync("appleFirstName");
       if (storedCredential) {
         setUser(JSON.parse(storedCredential));
       }
+      if (storedName) {
+        setFirstName(storedName);
+      }
     };
+
     checkStoredCredential();
   }, []);
 
@@ -64,9 +70,10 @@ export default function AppleAuth() {
       const firstName = credential.fullName?.givenName;
       if (firstName) {
         await SecureStore.setItemAsync("appleFirstName", firstName);
+        setFirstName(firstName);
         console.log("Stored Apple first name:", firstName);
       }
-      
+
       const isFirstTime = await AsyncStorage.getItem("hasSignedInBefore");
 
       if (!isFirstTime) {
