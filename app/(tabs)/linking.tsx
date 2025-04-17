@@ -19,7 +19,6 @@ const CombinedScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[
@@ -28,8 +27,16 @@ const CombinedScreen = () => {
           ]}
           onPress={() => setSelectedTab("Tracker")}
         >
-          <Text style={styles.tabText}>Daily Tracker</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "Tracker" && styles.activeTabText,
+            ]}
+          >
+            Daily Tracker
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[
             styles.tabButton,
@@ -37,8 +44,16 @@ const CombinedScreen = () => {
           ]}
           onPress={() => setSelectedTab("Links")}
         >
-          <Text style={styles.tabText}>Health Links</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "Links" && styles.activeTabText,
+            ]}
+          >
+            Health Links
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[
             styles.tabButton,
@@ -46,14 +61,20 @@ const CombinedScreen = () => {
           ]}
           onPress={() => setSelectedTab("Eye Survey")}
         >
-          <Text style={styles.tabText}>Eye Survey</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "Eye Survey" && styles.activeTabText,
+            ]}
+          >
+            Eye Survey
+          </Text>
         </TouchableOpacity>
       </View>
+
       {selectedTab === "Tracker" ? (
         <>
-          {/* Render the Tracker component */}
           <Tracker />
-
           <TouchableOpacity
             style={styles.bookIcon}
             onPress={() => setModalVisible(true)}
@@ -65,10 +86,9 @@ const CombinedScreen = () => {
             <View style={styles.modalContainer}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>Today's Log</Text>
-                {/* Add the dynamic log information */}
-                <Text>Sleep: {/* Add dynamic sleep log here */}</Text>
-                <Text>Eating: {/* Add dynamic eating log here */}</Text>
-                <Text>Exercise: {/* Add dynamic exercise log here */}</Text>
+                <Text>Sleep: </Text>
+                <Text>Eating: </Text>
+                <Text>Exercise: </Text>
 
                 <Pressable
                   style={styles.closeButton}
@@ -83,11 +103,13 @@ const CombinedScreen = () => {
       ) : selectedTab === "Links" ? (
         <>
           <Text style={styles.sectionTitle}>Health Records & Results</Text>
+
           <TouchableOpacity
             onPress={() => router.push("https://www.mychart.org/")}
-            style={[styles.linkButton, { backgroundColor: "#ffc9c9" }]}
+            style={styles.linkButton}
           >
-            <Text style={styles.buttonText}>Visit MyChart</Text>
+            <Ionicons name="link" size={24} color="#095da7" />
+            <Text style={styles.linkButtonText}>Visit MyChart</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -96,58 +118,91 @@ const CombinedScreen = () => {
                 "https://mychart.bilh.org/MyChart-BILH/Authentication/Login?"
               )
             }
-            style={[styles.linkButton, { backgroundColor: "#c4eaff" }]}
+            style={styles.linkButton}
           >
-            <Text style={styles.buttonText}>Visit MyBILH</Text>
+            <Ionicons name="link" size={24} color="#095da7" />
+            <Text style={styles.linkButtonText}>Visit MyBILH</Text>
           </TouchableOpacity>
         </>
       ) : selectedTab === "Eye Survey" ? (
         <EyeSurvey />
       ) : null}
-      ;
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    height: "100%",
-    margin: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+    padding: 16,
   },
   tabContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   tabButton: {
-    padding: 10,
-    width: "30%",
+    flex: 1,
+    paddingVertical: 12,
     alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
+    marginHorizontal: 4,
   },
   activeTab: {
-    backgroundColor: "#96cbf9",
+    backgroundColor: "#095da7",
+    shadowColor: "#095da7",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   tabText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    alignItems: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
+  },
+  activeTabText: {
+    color: "#fff",
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 16,
     color: "#333",
     textAlign: "center",
+  },
+  linkButton: {
+    padding: 18,
+    marginVertical: 8,
+    borderRadius: 10,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  linkButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginLeft: 10,
+  },
+  linkButtonIcon: {
+    width: 24,
+    height: 24,
   },
   bookIcon: {
     position: "absolute",
@@ -183,12 +238,6 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#095da7",
     borderRadius: 5,
-  },
-  linkButton: {
-    padding: 15,
-    marginVertical: 10,
-    borderRadius: 5,
-    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
