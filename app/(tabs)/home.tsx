@@ -11,6 +11,7 @@ import {
   Platform,
   Switch,
   Animated,
+  Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Calendar as CalendarView } from "react-native-calendars";
@@ -20,6 +21,7 @@ import { useIsFocused } from "@react-navigation/native";
 import ClaimPointsModal from "../../components/ClaimPointsModal";
 import { getAppleFirstName } from "../auth/appleauth";
 import { LinearGradient } from "expo-linear-gradient";
+import { eventTypeStyles } from '../styles/eventStyles';
 
 type DayMarking = {
   marked?: boolean;
@@ -47,33 +49,6 @@ type DayMarking = {
 type MarkedDates = {
   [date: string]: DayMarking;
 };
-
-const eventTypeStyles = {
-  personal: {
-    color: "#4A90E2",
-    backgroundColor: "#EBF3FC",
-    borderColor: "#4A90E2",
-    emoji: "👤",
-  },
-  "eye-exam": {
-    color: "#FF6B6B",
-    backgroundColor: "#FFE6E6",
-    borderColor: "#FF6B6B",
-    emoji: "👁️",
-  },
-  "doctor-appointment": {
-    color: "#50C878",
-    backgroundColor: "#E6F5EC",
-    borderColor: "#50C878",
-    emoji: "👨‍⚕️",
-  },
-  other: {
-    color: "#9B59B6",
-    backgroundColor: "#F4ECF7",
-    borderColor: "#9B59B6",
-    emoji: "🔷",
-  },
-} as const;
 
 interface Task {
   id: number;
@@ -144,6 +119,8 @@ export default function HomeScreen() {
   const [completedTasks, setCompletedTasks] = useState<Record<number, boolean>>(
     {}
   );
+  const [selectedDateEvents, setSelectedDateEvents] = useState<ExpoCalendar.Event[]>([]);
+  const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
     const initializeTasks = async () => {
@@ -530,7 +507,13 @@ export default function HomeScreen() {
         <View style={styles.calendarContainer}>
           <CalendarView
             onDayPress={(day: any) => {
-              console.log("selected day", day);
+              const selectedEvents = events.filter((event) => {
+                const eventDate = new Date(event.startDate);
+                return eventDate.toISOString().split('T')[0] === day.dateString;
+              });
+              setSelectedDateEvents(selectedEvents);
+              setSelectedDate(day.dateString);
+              setShowEventModal(true);
             }}
             markedDates={Object.entries(
               events.reduce<{
@@ -628,6 +611,95 @@ export default function HomeScreen() {
           />
         </View>
       </View>
+
+      <Modal
+        visible={showEventModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowEventModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowEventModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowEventModal(false)}
+            >
+              <Text style={styles.modalCloseButtonText}>✕</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.modalTitle}>
+              Events for {new Date(selectedDate).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </Text>
+
+            <ScrollView style={styles.modalScrollView}>
+              {selectedDateEvents.length > 0 ? (
+                selectedDateEvents.map((event) => {
+                  const isAppEvent = isAppCreatedEvent(event);
+                  const { classification } = parseEventDetails(event);
+                  const eventStyle = isAppEvent && classification
+                    ? eventTypeStyles[classification as keyof typeof eventTypeStyles]
+                    : undefined;
+
+                  return (
+                    <View
+                      key={event.id}
+                      style={[
+                        styles.modalEventItem,
+                        isAppEvent && {
+                          backgroundColor: eventStyle?.backgroundColor || "#f0f0f0",
+                          borderColor: eventStyle?.borderColor || "#ddd",
+                        }
+                      ]}
+                    >
+                      <View style={styles.modalEventHeader}>
+                        <Text
+                          style={[
+                            styles.modalEventTime,
+                            isAppEvent && { color: eventStyle?.color || "#2E66E7" }
+                          ]}
+                        >
+                          {new Date(event.startDate).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </Text>
+                        {event.location && (
+                          <Text style={styles.modalEventLocation}>📍 {event.location}</Text>
+                        )}
+                      </View>
+                      
+                      <Text
+                        style={[
+                          styles.modalEventTitle,
+                          isAppEvent && { color: eventStyle?.color || "#333" }
+                        ]}
+                      >
+                        {isAppEvent ? `${eventStyle?.emoji || "🔷"} ` : ""}{event.title}
+                      </Text>
+                      
+                      {event.notes && (
+                        <Text style={styles.modalEventNotes}>
+                          {parseEventDetails(event).notes}
+                        </Text>
+                      )}
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.noEventsText}>No events scheduled for this day</Text>
+              )}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -906,5 +978,82 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#2d4150',
+    textAlign: 'center',
+  },
+  modalScrollView: {
+    maxHeight: '90%',
+  },
+  modalEventItem: {
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: '#f8f9fa',
+    borderColor: '#dee2e6',
+  },
+  modalEventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  modalEventTime: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2E66E7',
+  },
+  modalEventLocation: {
+    fontSize: 14,
+    color: '#666',
+  },
+  modalEventTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
+    color: '#333',
+  },
+  modalEventNotes: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 1,
+    padding: 8,
+  },
+  modalCloseButtonText: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: '600',
   },
 });
