@@ -13,9 +13,9 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 import { toZonedTime, format as tzFormat } from "date-fns-tz";
-import { usePoints } from "../../components/PointsSystem";
-import TotalPoints from "../../components/TotalPoints";
-import ClaimPointsModal from "../../components/ClaimPointsModal";
+import { usePoints } from "../components/PointsSystem";
+import TotalPoints from "../components/TotalPoints";
+import ClaimPointsModal from "../components/ClaimPointsModal";
 import { Calendar } from "react-native-calendars";
 
 interface Log {
@@ -234,215 +234,217 @@ const Tracker: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TotalPoints />
-      <Text style={styles.sectionTitle}>Daily Tracker</Text>
+    <ScrollView>
+      <View style={styles.container}>
+        <TotalPoints />
+        <Text style={styles.sectionTitle}>Daily Tracker</Text>
 
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Sleeping Patterns</Text>
-        <View style={styles.buttonContainer}>
-          {["4-6 hrs", "6-8 hrs", "8-10 hrs"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                sleep === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("sleep", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Eating Habits</Text>
-        <View style={styles.buttonContainer}>
-          {["Healthy", "Moderate", "Unhealthy"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                eating === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("eating", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.trackerCategory}>
-        <Text style={styles.trackerLabel}>Exercise</Text>
-        <View style={styles.buttonContainer}>
-          {["None", "30 mins", "1 hr", "1.5+ hrs"].map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.trackerButton,
-                exercise === option && styles.selectedButton,
-              ]}
-              onPress={() => handleTrackerSelection("exercise", option)}
-            >
-              <Text style={styles.buttonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.saveButton} onPress={saveLog}>
-        <Text style={styles.saveButtonText}>
-          {logs.some((log) => log.date === getTodayDateString())
-            ? "Update Log"
-            : "Save Log"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.bookIcon} onPress={handleBookIconPress}>
-        <Ionicons name="book" size={32} color="#095da7" />
-        {unviewedLogCount > 0 && (
-          <View style={styles.logCountBadge}>
-            <Text style={styles.logCountText}>{unviewedLogCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-          setShowCalendar(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.navigationContainer}>
-              <TouchableOpacity onPress={goToPreviousLog}>
-                <Ionicons name="chevron-back" size={28} color="#095da7" />
-              </TouchableOpacity>
-
+        <View style={styles.trackerCategory}>
+          <Text style={styles.trackerLabel}>Sleeping Patterns</Text>
+          <View style={styles.buttonContainer}>
+            {["4-6 hrs", "6-8 hrs", "8-10 hrs"].map((option, index) => (
               <TouchableOpacity
-                onPress={() => setShowCalendar(!showCalendar)}
-                style={styles.dateSelector}
+                key={index}
+                style={[
+                  styles.trackerButton,
+                  sleep === option && styles.selectedButton,
+                ]}
+                onPress={() => handleTrackerSelection("sleep", option)}
               >
-                <Text style={styles.modalTitle}>
-                  {currentLog?.date
-                    ? formatDate(currentLog.date)
-                    : "Select a date"}
-                </Text>
-                <View style={styles.chevronContainer}>
-                  <Ionicons
-                    name={showCalendar ? "chevron-up" : "chevron-down"}
-                    size={18}
-                    color="#095da7"
+                <Text style={styles.buttonText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.trackerCategory}>
+          <Text style={styles.trackerLabel}>Eating Habits</Text>
+          <View style={styles.buttonContainer}>
+            {["Healthy", "Moderate", "Unhealthy"].map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.trackerButton,
+                  eating === option && styles.selectedButton,
+                ]}
+                onPress={() => handleTrackerSelection("eating", option)}
+              >
+                <Text style={styles.buttonText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.trackerCategory}>
+          <Text style={styles.trackerLabel}>Exercise</Text>
+          <View style={styles.buttonContainer}>
+            {["None", "30 mins", "1 hr", "1.5+ hrs"].map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.trackerButton,
+                  exercise === option && styles.selectedButton,
+                ]}
+                onPress={() => handleTrackerSelection("exercise", option)}
+              >
+                <Text style={styles.buttonText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={saveLog}>
+          <Text style={styles.saveButtonText}>
+            {logs.some((log) => log.date === getTodayDateString())
+              ? "Update Log"
+              : "Save Log"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.bookIcon} onPress={handleBookIconPress}>
+          <Ionicons name="book" size={32} color="#095da7" />
+          {unviewedLogCount > 0 && (
+            <View style={styles.logCountBadge}>
+              <Text style={styles.logCountText}>{unviewedLogCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+            setShowCalendar(false);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.navigationContainer}>
+                <TouchableOpacity onPress={goToPreviousLog}>
+                  <Ionicons name="chevron-back" size={28} color="#095da7" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setShowCalendar(!showCalendar)}
+                  style={styles.dateSelector}
+                >
+                  <Text style={styles.modalTitle}>
+                    {currentLog?.date
+                      ? formatDate(currentLog.date)
+                      : "Select a date"}
+                  </Text>
+                  <View style={styles.chevronContainer}>
+                    <Ionicons
+                      name={showCalendar ? "chevron-up" : "chevron-down"}
+                      size={18}
+                      color="#095da7"
+                    />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={goToNextLog}>
+                  <Ionicons name="chevron-forward" size={28} color="#095da7" />
+                </TouchableOpacity>
+              </View>
+
+              {showCalendar && (
+                <View style={styles.calendarContainer}>
+                  <Calendar
+                    markedDates={markedDates}
+                    onDayPress={(day: any) => {
+                      const logIndex = logs.findIndex(
+                        (log) => log.date === day.dateString
+                      );
+                      if (logIndex !== -1) {
+                        setCurrentLogIndex(logIndex);
+                        markLogAsViewed(logIndex);
+                      }
+                      setShowCalendar(false);
+                    }}
+                    theme={{
+                      backgroundColor: "#fff",
+                      calendarBackground: "#fff",
+                      selectedDayBackgroundColor: "#095da7",
+                      selectedDayTextColor: "#fff",
+                      todayTextColor: "#ff6b6b",
+                      dayTextColor: "#2d4150",
+                      textDisabledColor: "#d9e1e8",
+                      dotColor: "#ff4757",
+                      selectedDotColor: "#fff",
+                      arrowColor: "#095da7",
+                      monthTextColor: "#095da7",
+                      indicatorColor: "#095da7",
+                      textDayFontFamily: "System",
+                      textMonthFontFamily: "System",
+                      textDayHeaderFontFamily: "System",
+                      textDayFontWeight: "500",
+                      textMonthFontWeight: "bold",
+                      textDayHeaderFontWeight: "500",
+                      textDayFontSize: 15,
+                      textMonthFontSize: 18,
+                      textDayHeaderFontSize: 14,
+                      "stylesheet.calendar.header": {
+                        header: {
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          paddingLeft: 10,
+                          paddingRight: 10,
+                          marginTop: 6,
+                          alignItems: "center",
+                        },
+                      },
+                    }}
                   />
                 </View>
-              </TouchableOpacity>
+              )}
 
-              <TouchableOpacity onPress={goToNextLog}>
-                <Ionicons name="chevron-forward" size={28} color="#095da7" />
-              </TouchableOpacity>
-            </View>
+              <View style={styles.logContent}>
+                <Text style={styles.logLabel}>Sleep:</Text>
+                <Text style={styles.logValue}>
+                  {currentLog?.sleep || "Not logged"}
+                </Text>
 
-            {showCalendar && (
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  markedDates={markedDates}
-                  onDayPress={(day: any) => {
-                    const logIndex = logs.findIndex(
-                      (log) => log.date === day.dateString
-                    );
-                    if (logIndex !== -1) {
-                      setCurrentLogIndex(logIndex);
-                      markLogAsViewed(logIndex);
-                    }
-                    setShowCalendar(false);
-                  }}
-                  theme={{
-                    backgroundColor: "#fff",
-                    calendarBackground: "#fff",
-                    selectedDayBackgroundColor: "#095da7",
-                    selectedDayTextColor: "#fff",
-                    todayTextColor: "#ff6b6b",
-                    dayTextColor: "#2d4150",
-                    textDisabledColor: "#d9e1e8",
-                    dotColor: "#ff4757",
-                    selectedDotColor: "#fff",
-                    arrowColor: "#095da7",
-                    monthTextColor: "#095da7",
-                    indicatorColor: "#095da7",
-                    textDayFontFamily: "System",
-                    textMonthFontFamily: "System",
-                    textDayHeaderFontFamily: "System",
-                    textDayFontWeight: "500",
-                    textMonthFontWeight: "bold",
-                    textDayHeaderFontWeight: "500",
-                    textDayFontSize: 15,
-                    textMonthFontSize: 18,
-                    textDayHeaderFontSize: 14,
-                    "stylesheet.calendar.header": {
-                      header: {
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        paddingLeft: 10,
-                        paddingRight: 10,
-                        marginTop: 6,
-                        alignItems: "center",
-                      },
-                    },
-                  }}
-                />
+                <Text style={styles.logLabel}>Eating:</Text>
+                <Text style={styles.logValue}>
+                  {currentLog?.eating || "Not logged"}
+                </Text>
+
+                <Text style={styles.logLabel}>Exercise:</Text>
+                <Text style={styles.logValue}>
+                  {currentLog?.exercise || "Not logged"}
+                </Text>
               </View>
-            )}
 
-            <View style={styles.logContent}>
-              <Text style={styles.logLabel}>Sleep:</Text>
-              <Text style={styles.logValue}>
-                {currentLog?.sleep || "Not logged"}
+              <Text style={styles.logCounter}>
+                {logs.length > 0
+                  ? `${currentLogIndex + 1} of ${logs.length}`
+                  : "No logs yet"}
               </Text>
 
-              <Text style={styles.logLabel}>Eating:</Text>
-              <Text style={styles.logValue}>
-                {currentLog?.eating || "Not logged"}
-              </Text>
-
-              <Text style={styles.logLabel}>Exercise:</Text>
-              <Text style={styles.logValue}>
-                {currentLog?.exercise || "Not logged"}
-              </Text>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  setShowCalendar(false);
+                }}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </Pressable>
             </View>
-
-            <Text style={styles.logCounter}>
-              {logs.length > 0
-                ? `${currentLogIndex + 1} of ${logs.length}`
-                : "No logs yet"}
-            </Text>
-
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => {
-                setModalVisible(false);
-                setShowCalendar(false);
-              }}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      <ClaimPointsModal
-        visible={claimPointsModalVisible}
-        onClose={() => setClaimPointsModalVisible(false)}
-        onClaimPoints={handleClaimPoints}
-        task="Daily Tracker Log"
-        points={10}
-      />
-    </View>
+        <ClaimPointsModal
+          visible={claimPointsModalVisible}
+          onClose={() => setClaimPointsModalVisible(false)}
+          onClaimPoints={handleClaimPoints}
+          task="Daily Tracker Log"
+          points={10}
+        />
+      </View>
+    </ScrollView>
   );
 };
 
@@ -496,7 +498,7 @@ const styles = StyleSheet.create({
   },
   bookIcon: {
     position: "absolute",
-    bottom: 50,
+    bottom: 110,
     right: 20,
     backgroundColor: "#fff",
     borderRadius: 50,
