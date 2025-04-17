@@ -635,8 +635,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   debugButton: {
     position: "absolute",
-    bottom: Platform.OS === "ios" ? 670 : 10,
-    backgroundColor: "red",
+    bottom: Platform.OS === "ios" ? 665 : 10,
+    backgroundColor: "white",
     padding: 10,
     borderRadius: 5,
     zIndex: 100,

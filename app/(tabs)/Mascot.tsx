@@ -166,7 +166,10 @@ const Mascot = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 20,
+    paddingRight: 20,
+    paddingLeft: 20,
+    paddingBottom: 50,
   },
   itemContainer: {
     flex: 1,
