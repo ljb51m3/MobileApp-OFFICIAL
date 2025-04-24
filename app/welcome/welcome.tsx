@@ -67,9 +67,9 @@ export default function WelcomeScreen() {
         style={styles.background}
       />
 
-      <Text style={styles.title}>LENS</Text>
+      <Text style={styles.title}>REMIN-DR</Text>
       <Text style={styles.subtitle}>
-        Lahey Engagement for Navigating Screenings
+        BILH's Personal App for Diabetic Retinopathy
       </Text>
 
       <View style={styles.buttonContainer}>
