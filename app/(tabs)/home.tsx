@@ -54,6 +54,9 @@ interface Task {
   id: number;
   text: string;
   points: number;
+  isCustom?: boolean;
+  repeatFrequency?: 'none' | 'daily' | 'weekly' | 'monthly';
+  lastCompleted?: string | null;
 }
 
 interface AppData {
@@ -63,15 +66,20 @@ interface AppData {
   dailyTasks: Task[];
 }
 
+interface RepeatOption {
+  label: string;
+  value: string;
+}
+
 const ALL_TASKS: Task[] = [
-  { id: 1, text: "Schedule eye exam", points: 10 },
-  { id: 2, text: "Check blood sugar levels", points: 5 },
-  { id: 3, text: "Take prescribed medication", points: 5 },
-  { id: 4, text: "Exercise for 30 minutes", points: 15 },
-  { id: 5, text: "Eat a healthy meal", points: 10 },
-  { id: 6, text: "Drink 8 glasses of water", points: 8 },
-  { id: 7, text: "Meditate for 10 minutes", points: 7 },
-  { id: 8, text: "Get 8 hours of sleep", points: 12 },
+  { id: 1, text: "Schedule eye exam", points: 10, repeatFrequency: 'none', lastCompleted: null },
+  { id: 2, text: "Check blood sugar levels", points: 5, repeatFrequency: 'none', lastCompleted: null },
+  { id: 3, text: "Take prescribed medication", points: 5, repeatFrequency: 'none', lastCompleted: null },
+  { id: 4, text: "Exercise for 30 minutes", points: 15, repeatFrequency: 'none', lastCompleted: null },
+  { id: 5, text: "Eat a healthy meal", points: 10, repeatFrequency: 'none', lastCompleted: null },
+  { id: 6, text: "Drink 8 glasses of water", points: 8, repeatFrequency: 'none', lastCompleted: null },
+  { id: 7, text: "Meditate for 10 minutes", points: 7, repeatFrequency: 'none', lastCompleted: null },
+  { id: 8, text: "Get 8 hours of sleep", points: 12, repeatFrequency: 'none', lastCompleted: null },
 ];
 
 const parseEventDetails = (event: ExpoCalendar.Event) => {
@@ -121,6 +129,18 @@ export default function HomeScreen() {
   );
   const [selectedDateEvents, setSelectedDateEvents] = useState<ExpoCalendar.Event[]>([]);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [newTaskText, setNewTaskText] = useState("");
+  const [newTaskPoints, setNewTaskPoints] = useState("5");
+  const [shouldRepeat, setShouldRepeat] = useState(false);
+  const [repeatFrequency, setRepeatFrequency] = useState('none');
+
+  const REPEAT_OPTIONS: RepeatOption[] = [
+    { label: "Daily", value: "daily" },
+    { label: "Weekly", value: "weekly" },
+    { label: "Monthly", value: "monthly" },
+    { label: "Never", value: "none" },
+  ];
 
   useEffect(() => {
     const initializeTasks = async () => {
@@ -134,7 +154,14 @@ export default function HomeScreen() {
         if (data.lastUpdated !== today) {
           const shuffled = [...ALL_TASKS].sort(() => 0.5 - Math.random());
           const selected = shuffled.slice(0, 5);
-          setDailyTasks(selected);
+          
+          // Filter and add repeating tasks
+          const repeatingTasks = data.dailyTasks.filter(task => 
+            task.isCustom && task.repeatFrequency !== 'none' &&
+            shouldShowRepeatingTask(task, today)
+          );
+          
+          setDailyTasks([...selected, ...repeatingTasks]);
 
           await AsyncStorage.setItem(
             "@MascotAppData",
@@ -142,7 +169,7 @@ export default function HomeScreen() {
               points: data.points,
               lastUpdated: today,
               completed: {},
-              dailyTasks: selected,
+              dailyTasks: [...selected, ...repeatingTasks],
             } as AppData)
           );
         } else {
@@ -153,6 +180,25 @@ export default function HomeScreen() {
         setPoints(data.points || 0);
       } catch (error) {
         console.error("Failed to initialize tasks:", error);
+      }
+    };
+
+    const shouldShowRepeatingTask = (task: Task, today: string) => {
+      if (!task.lastCompleted) return true;
+      
+      const lastCompleted = new Date(task.lastCompleted);
+      const currentDate = new Date(today);
+      
+      switch (task.repeatFrequency) {
+        case 'daily':
+          return lastCompleted.getDate() !== currentDate.getDate();
+        case 'weekly':
+          const weekDiff = Math.floor((currentDate.getTime() - lastCompleted.getTime()) / (1000 * 60 * 60 * 24 * 7));
+          return weekDiff >= 1;
+        case 'monthly':
+          return lastCompleted.getMonth() !== currentDate.getMonth();
+        default:
+          return false;
       }
     };
 
@@ -295,6 +341,44 @@ export default function HomeScreen() {
     }
   };
 
+  const addCustomTask = async () => {
+    if (newTaskText.trim()) {
+      const newTask: Task = {
+        id: Date.now(),
+        text: newTaskText.trim(),
+        points: parseInt(newTaskPoints) || 5,
+        isCustom: true,
+        repeatFrequency: shouldRepeat ? repeatFrequency : 'none',
+        lastCompleted: null,
+      };
+
+      const updatedTasks = [...dailyTasks, newTask];
+      setDailyTasks(updatedTasks);
+
+      try {
+        const today = new Date().toDateString();
+        await AsyncStorage.setItem(
+          "@MascotAppData",
+          JSON.stringify({
+            points,
+            lastUpdated: today,
+            completed: completedTasks,
+            dailyTasks: updatedTasks,
+          })
+        );
+      } catch (error) {
+        console.error("Failed to save custom task:", error);
+      }
+
+      // Reset form
+      setNewTaskText("");
+      setNewTaskPoints("5");
+      setShouldRepeat(false);
+      setRepeatFrequency("none");
+      setShowAddTaskModal(false);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -326,11 +410,14 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.checklistContainer}>
-          <View style={styles.headerContainer}>
+          <View style={styles.checklistHeader}>
             <Text style={styles.checklistTitle}>Your Tasks For Today</Text>
-            <View style={styles.pointsContainer}>
-              <Text style={styles.pointsText}>💰 {points} pts</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.addTaskButton}
+              onPress={() => setShowAddTaskModal(true)}
+            >
+              <Text style={styles.addTaskButtonText}>+ Add Task</Text>
+            </TouchableOpacity>
           </View>
           {dailyTasks.map((task) => (
             <View
@@ -700,6 +787,101 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <Modal
+        visible={showAddTaskModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAddTaskModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowAddTaskModal(false)}
+        >
+          <View style={styles.addTaskModalContent}>
+            <Text style={styles.addTaskModalTitle}>Add New Task</Text>
+            
+            <TextInput
+              style={styles.addTaskInput}
+              placeholder="Enter task description"
+              value={newTaskText}
+              onChangeText={setNewTaskText}
+              multiline={true}
+              maxLength={100}
+            />
+            
+            <View style={styles.pointsInputContainer}>
+              <Text style={styles.pointsInputLabel}>Points:</Text>
+              <TextInput
+                style={styles.pointsInput}
+                placeholder="5"
+                value={newTaskPoints}
+                onChangeText={setNewTaskPoints}
+                keyboardType="numeric"
+                maxLength={3}
+              />
+            </View>
+
+            <View style={styles.repeatContainer}>
+              <Text style={styles.repeatLabel}>Repeat Task?</Text>
+              <Switch
+                value={shouldRepeat}
+                onValueChange={(value) => {
+                  setShouldRepeat(value);
+                  if (!value) setRepeatFrequency('none');
+                }}
+                trackColor={{ false: "#767577", true: "#095da7" }}
+                thumbColor={shouldRepeat ? "#fff" : "#f4f3f4"}
+              />
+            </View>
+
+            {shouldRepeat && (
+              <View style={styles.repeatOptionsContainer}>
+                {REPEAT_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.repeatOption,
+                      repeatFrequency === option.value && styles.repeatOptionSelected,
+                    ]}
+                    onPress={() => setRepeatFrequency(option.value)}
+                  >
+                    <Text
+                      style={[
+                        styles.repeatOptionText,
+                        repeatFrequency === option.value && styles.repeatOptionTextSelected,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            <View style={styles.addTaskModalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setShowAddTaskModal(false);
+                  setShouldRepeat(false);
+                  setRepeatFrequency('none');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.addButton]}
+                onPress={addCustomTask}
+              >
+                <Text style={styles.addButtonText}>Add Task</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -832,6 +1014,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     color: "black",
+  },
+  checklistHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   taskItem: {
     flexDirection: "row",
@@ -1055,5 +1243,136 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#666',
     fontWeight: '600',
+  },
+  addTaskButton: {
+    backgroundColor: '#095da7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  addTaskButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  addTaskModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  addTaskModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#2d4150',
+    textAlign: 'center',
+  },
+  addTaskInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 15,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  pointsInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  pointsInputLabel: {
+    fontSize: 16,
+    marginRight: 10,
+    color: '#2d4150',
+  },
+  pointsInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 8,
+    width: 60,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  addTaskModalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  addButton: {
+    backgroundColor: '#095da7',
+  },
+  cancelButtonText: {
+    color: '#495057',
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  addButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  repeatContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+    paddingHorizontal: 5,
+  },
+  repeatLabel: {
+    fontSize: 16,
+    color: '#2d4150',
+    fontWeight: '600',
+  },
+  repeatOptionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  repeatOption: {
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginBottom: 8,
+    width: '48%',
+    alignItems: 'center',
+  },
+  repeatOptionSelected: {
+    backgroundColor: '#095da7',
+    borderColor: '#095da7',
+  },
+  repeatOptionText: {
+    fontSize: 14,
+    color: '#2d4150',
+    fontWeight: '500',
+  },
+  repeatOptionTextSelected: {
+    color: '#fff',
   },
 });
