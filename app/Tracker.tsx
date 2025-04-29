@@ -55,7 +55,9 @@ const Tracker: React.FC = () => {
           const parsedLogs: Log[] = JSON.parse(savedLogs);
           setLogs(parsedLogs);
 
-          const marked: { [key: string]: { marked: boolean; dotColor: string } } = {};
+          const marked: {
+            [key: string]: { marked: boolean; dotColor: string };
+          } = {};
           parsedLogs.forEach((log) => {
             marked[log.date] = {
               marked: true,
@@ -191,7 +193,9 @@ const Tracker: React.FC = () => {
     if (!updatedLogs[index].viewed) {
       updatedLogs[index].viewed = true;
       setLogs(updatedLogs);
-      const updatedMarkedDates: Record<string, { dotColor: string }> = { ...markedDates };
+      const updatedMarkedDates: Record<string, { dotColor: string }> = {
+        ...markedDates,
+      };
       updatedMarkedDates[updatedLogs[index].date] = {
         ...updatedMarkedDates[updatedLogs[index].date],
         dotColor: "#999",
@@ -452,7 +456,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 10,
-    height: 630,
+    height: 530,
     margin: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -497,7 +501,7 @@ const styles = StyleSheet.create({
   },
   bookIcon: {
     position: "absolute",
-    bottom: 110,
+    bottom: 20,
     right: 20,
     backgroundColor: "#fff",
     borderRadius: 50,

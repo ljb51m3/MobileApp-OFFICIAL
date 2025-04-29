@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 150,
-    backgroundColor: "#f0f8ff",
+    backgroundColor: "#f8f9fa",
   },
   sectionTitle: {
     fontSize: 22,

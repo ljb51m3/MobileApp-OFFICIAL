@@ -57,7 +57,7 @@ type MarkedDates = {
 interface ReminderOption {
   label: string;
   value: number;
-  unit: 'days' | 'weeks' | 'months' | 'years';
+  unit: "days" | "weeks" | "months" | "years";
   description: string;
 }
 
@@ -65,27 +65,27 @@ const reminderOptions: ReminderOption[] = [
   {
     label: "One Week",
     value: 1,
-    unit: 'weeks',
-    description: "Set a reminder for next week"
+    unit: "weeks",
+    description: "Set a reminder for next week",
   },
   {
     label: "One Month",
     value: 1,
-    unit: 'months',
-    description: "Set a reminder for next month"
+    unit: "months",
+    description: "Set a reminder for next month",
   },
   {
     label: "Six Months",
     value: 6,
-    unit: 'months',
-    description: "Set a reminder for six months from now"
+    unit: "months",
+    description: "Set a reminder for six months from now",
   },
   {
     label: "One Year",
     value: 1,
-    unit: 'years',
-    description: "Set a reminder for next year"
-  }
+    unit: "years",
+    description: "Set a reminder for next year",
+  },
 ];
 
 export default function CalendarScreen() {
@@ -117,8 +117,11 @@ export default function CalendarScreen() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isFollowUpScheduling, setIsFollowUpScheduling] = useState(false);
-  const [reminderInterval, setReminderInterval] = useState<ReminderOption>(reminderOptions[0]);
-  const [showReminderOptionsModal, setShowReminderOptionsModal] = useState(false);
+  const [reminderInterval, setReminderInterval] = useState<ReminderOption>(
+    reminderOptions[0]
+  );
+  const [showReminderOptionsModal, setShowReminderOptionsModal] =
+    useState(false);
 
   // Add useEffect to log state changes
   useEffect(() => {
@@ -484,8 +487,11 @@ export default function CalendarScreen() {
         }
 
         // Calculate the reminder date string
-        const reminderDateString = calculateReminderDate(dateString, reminderInterval);
-        
+        const reminderDateString = calculateReminderDate(
+          dateString,
+          reminderInterval
+        );
+
         // Create the reminder date at 10 AM on the calculated date
         const reminderDate = new Date(reminderDateString);
         reminderDate.setHours(10, 0, 0, 0);
@@ -515,7 +521,9 @@ export default function CalendarScreen() {
 
         Alert.alert(
           "Reminder Scheduled",
-          `Your reminder has been scheduled for ${formatDate(reminderDateString)}`,
+          `Your reminder has been scheduled for ${formatDate(
+            reminderDateString
+          )}`,
           [{ text: "OK" }]
         );
       } catch (error) {
@@ -528,27 +536,30 @@ export default function CalendarScreen() {
     setShowDatePickerModal(false);
   };
 
-  const calculateReminderDate = (initialDate: string, option: ReminderOption) => {
+  const calculateReminderDate = (
+    initialDate: string,
+    option: ReminderOption
+  ) => {
     // Create a date at the start of the day in local timezone
     const date = new Date(initialDate);
     date.setHours(0, 0, 0, 0);
-    
+
     switch (option.unit) {
-      case 'days':
+      case "days":
         date.setDate(date.getDate() + option.value);
         break;
-      case 'weeks':
-        date.setDate(date.getDate() + (option.value * 7));
+      case "weeks":
+        date.setDate(date.getDate() + option.value * 7);
         break;
-      case 'months':
+      case "months":
         date.setMonth(date.getMonth() + option.value);
         break;
-      case 'years':
+      case "years":
         date.setFullYear(date.getFullYear() + option.value);
         break;
     }
-    
-    return date.toISOString().split('T')[0];
+
+    return date.toISOString().split("T")[0];
   };
 
   const dismissKeyboard = () => {
@@ -659,13 +670,13 @@ export default function CalendarScreen() {
               setShowEventModal(true);
             }}
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "#095da7",
               padding: 15,
               borderRadius: 10,
               marginBottom: 20,
               width: "100%",
               borderWidth: 1,
-              borderColor: "#2E66E7",
+              borderColor: "#095da7",
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
@@ -675,25 +686,25 @@ export default function CalendarScreen() {
               style={{
                 fontSize: 20,
                 fontWeight: "600",
-                color: "#2E66E7",
+                color: "#fff",
               }}
             >
               Add New Event
             </Text>
-            <Text style={{ fontSize: 24, color: "#2E66E7" }}>📅</Text>
+            <Text style={{ fontSize: 24, color: "#fff" }}>📅</Text>
           </TouchableOpacity>
 
           {/* Reminder Scheduler Button */}
           <TouchableOpacity
             onPress={() => setShowReminderOptionsModal(true)}
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "#095da7",
               padding: 15,
               borderRadius: 10,
               marginBottom: 20,
               width: "100%",
               borderWidth: 1,
-              borderColor: "#2E66E7",
+              borderColor: "#095da7",
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
@@ -703,12 +714,12 @@ export default function CalendarScreen() {
               style={{
                 fontSize: 20,
                 fontWeight: "600",
-                color: "#2E66E7",
+                color: "#fff",
               }}
             >
               Schedule Future Reminders
             </Text>
-            <Text style={{ fontSize: 24, color: "#2E66E7" }}>⏰</Text>
+            <Text style={{ fontSize: 24, color: "#fff" }}>⏰</Text>
           </TouchableOpacity>
 
           <Calendar
@@ -735,14 +746,19 @@ export default function CalendarScreen() {
                   )
                 ).map(([date, dateEvents]) => {
                   const isSelected = date === selectedDate;
-                  
+
                   // Check if there's an app-created event for this date
-                  const appEvent = dateEvents.find((event) => isAppCreatedEvent(event));
+                  const appEvent = dateEvents.find((event) =>
+                    isAppCreatedEvent(event)
+                  );
 
                   if (appEvent) {
                     // If there's an app event, use its styling
                     const { classification } = parseEventDetails(appEvent);
-                    const eventStyle = eventTypeStyles[classification as keyof typeof eventTypeStyles];
+                    const eventStyle =
+                      eventTypeStyles[
+                        classification as keyof typeof eventTypeStyles
+                      ];
 
                     return [
                       date,
@@ -751,24 +767,24 @@ export default function CalendarScreen() {
                         selected: isSelected,
                         dots: [
                           {
-                            color: eventStyle?.borderColor || "#2E66E7",
-                            key: 'dot',
-                            size: 4
-                          }
+                            color: eventStyle?.borderColor || "#095da7",
+                            key: "dot",
+                            size: 4,
+                          },
                         ],
                         customStyles: {
                           container: {
                             backgroundColor: isSelected
-                              ? eventStyle?.borderColor || "#2E66E7"
+                              ? eventStyle?.borderColor || "#095da7"
                               : eventStyle?.backgroundColor || "transparent",
                             borderWidth: 2,
-                            borderColor: eventStyle?.borderColor || "#2E66E7",
+                            borderColor: eventStyle?.borderColor || "#095da7",
                             borderRadius: 20,
                           },
                           text: {
                             color: isSelected
                               ? "#FFFFFF"
-                              : eventStyle?.color || "#2E66E7",
+                              : eventStyle?.color || "#095da7",
                             fontWeight: "bold",
                           },
                         },
@@ -781,7 +797,7 @@ export default function CalendarScreen() {
                       {
                         marked: true,
                         selected: isSelected,
-                        selectedColor: "#2E66E7",
+                        selectedColor: "#095da7",
                         dotColor: "#666666",
                       },
                     ];
@@ -796,7 +812,7 @@ export default function CalendarScreen() {
                 ? {
                     [selectedDate]: {
                       selected: true,
-                      selectedColor: "#2E66E7",
+                      selectedColor: "#095da7",
                     },
                   }
                 : {}),
@@ -806,10 +822,10 @@ export default function CalendarScreen() {
               calendarBackground: "#ffffff",
               textSectionTitleColor: "#2d4150",
               selectedDayTextColor: "#ffffff",
-              todayTextColor: "#2E66E7",
+              todayTextColor: "#095da7",
               dayTextColor: "#2d4150",
               textDisabledColor: "#d9e1e8",
-              arrowColor: "#2E66E7",
+              arrowColor: "#095da7",
               monthTextColor: "#2d4150",
               textDayFontSize: 16,
               textMonthFontSize: 18,
@@ -1130,7 +1146,7 @@ export default function CalendarScreen() {
                   fontWeight: "bold",
                   marginBottom: 10,
                   textAlign: "center",
-                  color: "#2E66E7",
+                  color: "#095da7",
                 }}
               >
                 Schedule {reminderInterval.label} Reminder
@@ -1144,7 +1160,8 @@ export default function CalendarScreen() {
                   marginBottom: 20,
                 }}
               >
-                Select the initial date to schedule your {reminderInterval.label.toLowerCase()} reminder
+                Select the initial date to schedule your{" "}
+                {reminderInterval.label.toLowerCase()} reminder
               </Text>
 
               <Calendar
@@ -1155,7 +1172,7 @@ export default function CalendarScreen() {
                 markedDates={{
                   [selectedEventDate]: {
                     selected: true,
-                    selectedColor: "#2E66E7",
+                    selectedColor: "#095da7",
                   },
                 }}
                 style={{
@@ -1167,14 +1184,14 @@ export default function CalendarScreen() {
                 theme={{
                   backgroundColor: "#ffffff",
                   calendarBackground: "#ffffff",
-                  selectedDayBackgroundColor: "#2E66E7",
+                  selectedDayBackgroundColor: "#095da7",
                   selectedDayTextColor: "#ffffff",
-                  todayTextColor: "#2E66E7",
+                  todayTextColor: "#095da7",
                   dayTextColor: "#2d4150",
                   textDisabledColor: "#d9e1e8",
-                  dotColor: "#2E66E7",
+                  dotColor: "#095da7",
                   selectedDotColor: "#ffffff",
-                  arrowColor: "#2E66E7",
+                  arrowColor: "#095da7",
                   monthTextColor: "#2d4150",
                   textDayFontSize: 16,
                   textMonthFontSize: 18,
@@ -1210,7 +1227,9 @@ export default function CalendarScreen() {
                   }}
                 >
                   Follow-up Reminder:{" "}
-                  {formatDate(calculateReminderDate(selectedEventDate, reminderInterval))}
+                  {formatDate(
+                    calculateReminderDate(selectedEventDate, reminderInterval)
+                  )}
                 </Text>
               </View>
 
@@ -1319,6 +1338,57 @@ export default function CalendarScreen() {
                         Add New Event
                       </Text>
 
+                <TouchableOpacity
+                  onPress={addEvent}
+                  style={{
+                    backgroundColor: "#095da7",
+                    paddingVertical: 16,
+                    paddingHorizontal: 12,
+                    borderRadius: 8,
+                    flex: 1,
+                    marginLeft: 10,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#000",
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                    minHeight: 70,
+                  }}
+                >
+                  <View
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 14,
+                        fontWeight: "600",
+                        textAlign: "center",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Save Event
+                    </Text>
+                    <Text
+                      style={{
+                        color: "rgba(255,255,255,0.8)",
+                        fontSize: 11,
+                        textAlign: "center",
+                      }}
+                    >
+                      Add to calendar
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
                       <TextInput
                         placeholder="Event Title"
                         value={newEvent.title}
@@ -1419,6 +1489,34 @@ export default function CalendarScreen() {
                         </TouchableOpacity>
                       </View>
 
+                    <TouchableOpacity
+                      onPress={() => setShowTimePickerModal(false)}
+                      style={{
+                        backgroundColor: "#095da7",
+                        paddingVertical: 15,
+                        paddingHorizontal: 25,
+                        borderRadius: 8,
+                        shadowColor: "#000",
+                        shadowOffset: {
+                          width: 0,
+                          height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          textAlign: "center",
+                          fontSize: 16,
+                          fontWeight: "600",
+                        }}
+                      >
+                        Confirm Time
+                      </Text>
+                      <Text
                       <View style={{ marginBottom: 20 }}>
                         <Text style={{ marginBottom: 5 }}>Reminders</Text>
                         <TouchableOpacity
@@ -1506,6 +1604,33 @@ export default function CalendarScreen() {
                         >
                           <Text
                             style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 12,
+                              borderWidth: 2,
+                              borderColor: "#095da7",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              marginRight: 15,
+                            }}
+                          >
+                            {selectedAlerts.includes(option.value) && (
+                              <View
+                                style={{
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 6,
+                                  backgroundColor: "#095da7",
+                                }}
+                              />
+                            )}
+                          </View>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              color: selectedAlerts.includes(option.value)
+                                ? "#095da7"
+                                : "#333",
                               color: "#495057",
                               fontSize: 18,
                               fontWeight: "600",
@@ -1551,6 +1676,22 @@ export default function CalendarScreen() {
                         </TouchableOpacity>
                       </View>
 
+                    <TouchableOpacity
+                      onPress={() => setShowReminderModal(false)}
+                      style={{
+                        backgroundColor: "#095da7",
+                        padding: 15,
+                        borderRadius: 8,
+                        marginTop: 20,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 16,
+                          fontWeight: "600",
+                        }}
                       {/* Time Picker Modal*/}
                       <Modal
                         visible={showTimePickerModal}
@@ -1679,6 +1820,11 @@ export default function CalendarScreen() {
                       >
                         <View
                           style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            borderWidth: 2,
+                            borderColor: "#095da7",
                             flex: 1,
                             backgroundColor: "rgba(0,0,0,0.5)",
                             justifyContent: "center",
@@ -1785,7 +1931,10 @@ export default function CalendarScreen() {
                             <TouchableOpacity
                               onPress={() => setShowReminderModal(false)}
                               style={{
-                                backgroundColor: "#2E66E7",
+                                width: 16,
+                                height: 16,
+                                borderRadius: 8,
+                                backgroundColor: "#095da7",
                                 padding: 15,
                                 borderRadius: 8,
                                 marginTop: 20,
@@ -1935,6 +2084,11 @@ export default function CalendarScreen() {
                       >
                         <Pressable
                           style={{
+                            fontSize: 18,
+                            color:
+                              newEvent.classification === option.value
+                                ? "#095da7"
+                                : "#333",
                             position: "absolute",
                             top: 0,
                             left: 0,
@@ -1975,48 +2129,117 @@ export default function CalendarScreen() {
                               Select Event Date
                             </Text>
 
-                            <Calendar
-                              current={selectedEventDate}
-                              onDayPress={(day: { dateString: string }) => {
-                                setSelectedEventDate(day.dateString);
-                                setShowDatePickerModal(false);
-                              }}
-                              markedDates={{
-                                [selectedEventDate]: {
-                                  selected: true,
-                                  selectedColor: "#2E66E7",
-                                },
-                              }}
-                              style={{
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: "#E5E5E5",
-                                marginBottom: 20,
-                              }}
-                              theme={{
-                                backgroundColor: "#ffffff",
-                                calendarBackground: "#ffffff",
-                                selectedDayBackgroundColor: "#2E66E7",
-                                selectedDayTextColor: "#ffffff",
-                                todayTextColor: "#2E66E7",
-                                dayTextColor: "#2d4150",
-                                textDisabledColor: "#d9e1e8",
-                                dotColor: "#2E66E7",
-                                selectedDotColor: "#ffffff",
-                                arrowColor: "#2E66E7",
-                                monthTextColor: "#2d4150",
-                                textDayFontSize: 16,
-                                textMonthFontSize: 18,
-                                textDayHeaderFontSize: 14,
-                              }}
-                            />
-                          </Pressable>
-                        </Pressable>
-                      </Modal>
-                    </View>
-                  </TouchableWithoutFeedback>
+                    <TouchableOpacity
+                      onPress={() => setShowClassificationModal(false)}
+                      style={{
+                        backgroundColor: "#095da7",
+                        padding: 15,
+                        borderRadius: 8,
+                        marginTop: 20,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 16,
+                          fontWeight: "600",
+                        }}
+                      >
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </KeyboardAvoidingView>
+              </Modal>
+
+              {/* Date Picker Modal for New Event */}
+              <Modal
+                visible={showDatePickerModal && !isFollowUpScheduling}
+                animationType="none"
+                transparent={true}
+                statusBarTranslucent={true}
+              >
+                <Pressable
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => setShowDatePickerModal(false)}
+                >
+                  <Pressable
+                    style={{
+                      backgroundColor: "white",
+                      width: "90%",
+                      padding: 20,
+                      borderRadius: 10,
+                      maxHeight: "90%",
+                      shadowColor: "#000",
+                      shadowOffset: {
+                        width: 0,
+                        height: 2,
+                      },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                    }}
+                    onPress={(e) => e.stopPropagation()}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+                        marginBottom: 10,
+                        textAlign: "center",
+                        color: "#095da7",
+                      }}
+                    >
+                      Select Event Date
+                    </Text>
+
+                    <Calendar
+                      current={selectedEventDate}
+                      onDayPress={(day: { dateString: string }) => {
+                        setSelectedEventDate(day.dateString);
+                        setShowDatePickerModal(false);
+                      }}
+                      markedDates={{
+                        [selectedEventDate]: {
+                          selected: true,
+                          selectedColor: "#095da7",
+                        },
+                      }}
+                      style={{
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderColor: "#E5E5E5",
+                        marginBottom: 20,
+                      }}
+                      theme={{
+                        backgroundColor: "#ffffff",
+                        calendarBackground: "#ffffff",
+                        selectedDayBackgroundColor: "#095da7",
+                        selectedDayTextColor: "#ffffff",
+                        todayTextColor: "#095da7",
+                        dayTextColor: "#2d4150",
+                        textDisabledColor: "#d9e1e8",
+                        dotColor: "#095da7",
+                        selectedDotColor: "#ffffff",
+                        arrowColor: "#095da7",
+                        monthTextColor: "#2d4150",
+                        textDayFontSize: 16,
+                        textMonthFontSize: 18,
+                        textDayHeaderFontSize: 14,
+                      }}
+                    />
+                  </Pressable>
+                </Pressable>
+              </Modal>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
@@ -2066,7 +2289,7 @@ export default function CalendarScreen() {
               >
                 Schedule Future Reminders
               </Text>
-              
+
               <Text
                 style={{
                   fontSize: 14,
@@ -2094,7 +2317,7 @@ export default function CalendarScreen() {
                     padding: 15,
                     borderRadius: 10,
                     borderWidth: 1,
-                    borderColor: "#2E66E7",
+                    borderColor: "#095da7",
                     marginBottom: 10,
                     flexDirection: "row",
                     alignItems: "center",
@@ -2104,7 +2327,7 @@ export default function CalendarScreen() {
                   <View>
                     <Text
                       style={{
-                        color: "#2E66E7",
+                        color: "#095da7",
                         fontSize: 16,
                         fontWeight: "600",
                         marginBottom: 4,
@@ -2121,7 +2344,7 @@ export default function CalendarScreen() {
                       {option.description}
                     </Text>
                   </View>
-                  <Text style={{ fontSize: 20, color: "#2E66E7" }}>→</Text>
+                  <Text style={{ fontSize: 20, color: "#095da7" }}>→</Text>
                 </TouchableOpacity>
               ))}
 
