@@ -22,7 +22,7 @@ export default function TabLayout() {
     <PointsProvider>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          tabBarActiveTintColor: "#095da7",
           headerShown: true, // top navigation bar
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
@@ -56,7 +56,7 @@ export default function TabLayout() {
           },
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].background,
-            height: 110,
+            height: 100,
           },
           headerLeftContainerStyle: {
             paddingLeft: 15,
@@ -113,15 +113,6 @@ export default function TabLayout() {
             ),
           }}
         />
-        {/* <Tabs.Screen
-          name="contact"
-          options={{
-            title: "My Doctors",
-            tabBarIcon: ({ color }) => (
-              <Feather name="phone-call" size={32} color={color} />
-            ),
-          }} */}
-        {/* /> */}
         <Tabs.Screen
           name="Mascot"
           options={{
