@@ -276,7 +276,6 @@ const SurveyPhoto = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-
         <View style={styles.pageButtons}>
           <TouchableOpacity
             onPress={() => setCurrentPage(1)}
@@ -320,7 +319,7 @@ const SurveyPhoto = () => {
                 color: "#000",
                 borderRadius: 8,
                 borderWidth: 2,
-                borderColor: "#0077ff",
+                borderColor: "#095da7",
                 padding: 10,
               },
             ]}
@@ -344,7 +343,7 @@ const SurveyPhoto = () => {
                 color: "#000",
                 borderRadius: 8,
                 borderWidth: 2,
-                borderColor: "#0077ff",
+                borderColor: "#095da7",
                 padding: 10,
               },
             ]}
@@ -579,7 +578,7 @@ const styles = StyleSheet.create({
   },
   choiceButton: {
     borderWidth: 1,
-    borderColor: "#0077ff",
+    borderColor: "#095da7",
     borderRadius: 5,
     width: 275,
     paddingVertical: 6,
@@ -587,10 +586,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   selectedChoice: {
-    backgroundColor: "#0077ff",
+    backgroundColor: "#095da7",
   },
   choiceText: {
-    color: "#0077ff",
+    color: "#095da7",
     fontSize: 14,
     textAlign: "center",
   },
@@ -619,10 +618,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   activePageButton: {
-    backgroundColor: "#0077ff",
+    backgroundColor: "#095da7",
   },
   pageButtonText: {
-    color: "#0077ff",
+    color: "#095da7",
     fontWeight: "bold",
   },
   activePageButtonText: {

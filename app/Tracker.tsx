@@ -55,7 +55,9 @@ const Tracker: React.FC = () => {
           const parsedLogs: Log[] = JSON.parse(savedLogs);
           setLogs(parsedLogs);
 
-          const marked: { [key: string]: { marked: boolean; dotColor: string } } = {};
+          const marked: {
+            [key: string]: { marked: boolean; dotColor: string };
+          } = {};
           parsedLogs.forEach((log) => {
             marked[log.date] = {
               marked: true,
@@ -191,7 +193,9 @@ const Tracker: React.FC = () => {
     if (!updatedLogs[index].viewed) {
       updatedLogs[index].viewed = true;
       setLogs(updatedLogs);
-      const updatedMarkedDates: Record<string, { dotColor: string }> = { ...markedDates };
+      const updatedMarkedDates: Record<string, { dotColor: string }> = {
+        ...markedDates,
+      };
       updatedMarkedDates[updatedLogs[index].date] = {
         ...updatedMarkedDates[updatedLogs[index].date],
         dotColor: "#999",
