@@ -15,6 +15,9 @@ import {
   StyleSheet,
   Pressable,
   TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import * as ExpoCalendar from "expo-calendar";
@@ -548,8 +551,12 @@ export default function CalendarScreen() {
     return date.toISOString().split('T')[0];
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'white' }}>
       {/* Error Modal - Move it here, at the very top level */}
       {showErrorModal && (
         <View
@@ -623,7 +630,7 @@ export default function CalendarScreen() {
 
       <View style={{ flex: 1 }}>
         <ScrollView
-          style={{ flex: 1 }}
+          style={{ flex: 1, backgroundColor: 'white' }}
           contentContainerStyle={{
             paddingTop: 50,
             paddingHorizontal: 15,
@@ -1286,758 +1293,732 @@ export default function CalendarScreen() {
           animationType="slide"
           transparent={true}
         >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              justifyContent: "center",
-              zIndex: 1000,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "white",
-                margin: 20,
-                padding: 20,
-                borderRadius: 10,
-                zIndex: 1001,
-              }}
-            >
-              <Text
-                style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}
-              >
-                Add New Event
-              </Text>
-
-              <TextInput
-                placeholder="Event Title"
-                value={newEvent.title}
-                onChangeText={(text) =>
-                  setNewEvent({ ...newEvent, title: text })
-                }
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  padding: 10,
-                  marginBottom: 10,
-                  borderRadius: 5,
-                }}
-              />
-
-              <TextInput
-                placeholder="Location"
-                value={newEvent.location}
-                onChangeText={(text) =>
-                  setNewEvent({ ...newEvent, location: text })
-                }
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  padding: 10,
-                  marginBottom: 10,
-                  borderRadius: 5,
-                }}
-              />
-
-              <TextInput
-                placeholder="Notes"
-                value={newEvent.notes}
-                onChangeText={(text) =>
-                  setNewEvent({ ...newEvent, notes: text })
-                }
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  padding: 10,
-                  marginBottom: 10,
-                  borderRadius: 5,
-                }}
-              />
-
-              <View style={{ marginBottom: 10 }}>
-                <Text style={{ marginBottom: 5 }}>Date</Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowDatePickerModal(true);
-                    setIsFollowUpScheduling(false); // Ensure we're not in follow-up mode
-                  }}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ddd",
-                    padding: 15,
-                    borderRadius: 5,
-                    backgroundColor: "#f8f9fa",
-                  }}
-                >
-                  <Text style={{ color: "#2d4150", fontSize: 16 }}>
-                    📅 {formatDate(selectedEventDate)}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{ marginBottom: 10 }}>
-                <Text style={{ marginBottom: 5 }}>Start Time</Text>
-                <TouchableOpacity
-                  onPress={() => openTimePicker(true)}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ddd",
-                    padding: 15,
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text>
-                    {newEvent.startTime} {startPeriod}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ marginBottom: 5 }}>End Time</Text>
-                <TouchableOpacity
-                  onPress={() => openTimePicker(false)}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ddd",
-                    padding: 15,
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text>
-                    {newEvent.endTime} {endPeriod}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ marginBottom: 5 }}>Reminders</Text>
-                <TouchableOpacity
-                  onPress={() => setShowReminderModal(true)}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ddd",
-                    padding: 15,
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text>
-                    {selectedAlerts.length === 0
-                      ? "No reminders set"
-                      : `${selectedAlerts.length} reminder${
-                          selectedAlerts.length !== 1 ? "s" : ""
-                        } set`}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{ marginBottom: 20 }}>
-                <Text style={{ marginBottom: 5 }}>Event Type</Text>
-                <TouchableOpacity
-                  onPress={() => setShowClassificationModal(true)}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ddd",
-                    padding: 15,
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text>
-                    {EventClassification.find(
-                      (c) => c.value === newEvent.classification
-                    )?.label || "Select type"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: 20,
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    // Reset all modal states
-                    setShowEventModal(false);
-                    setShowTimePickerModal(false);
-                    setShowDatePickerModal(false);
-                    setShowReminderModal(false);
-                    setShowErrorModal(false);
-
-                    // Reset form states
-                    setNewEvent({
-                      title: "",
-                      location: "",
-                      notes: "",
-                      startTime: "12:00",
-                      endTime: "1:00",
-                      classification: "personal",
-                    });
-                    setSelectedAlerts(["15"]);
-
-                    setSelectedEventDate(
-                      new Date().toISOString().split("T")[0]
-                    );
-
-                    // Reset time states
-                    setStartPeriod("AM");
-                    setEndPeriod("AM");
-
-                    // Reset any error state
-                    setErrorMessage("");
-                  }}
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    paddingVertical: 16,
-                    paddingHorizontal: 12,
-                    borderRadius: 8,
-                    flex: 1,
-                    marginRight: 10,
-                    borderWidth: 1,
-                    borderColor: "#dee2e6",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 70,
-                  }}
-                >
-                  <View
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#495057",
-                        fontSize: 14,
-                        fontWeight: "600",
-                        textAlign: "center",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Cancel Event
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#6c757d",
-                        fontSize: 11,
-                        textAlign: "center",
-                      }}
-                    >
-                      Discard changes
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={addEvent}
-                  style={{
-                    backgroundColor: "#2E66E7",
-                    paddingVertical: 16,
-                    paddingHorizontal: 12,
-                    borderRadius: 8,
-                    flex: 1,
-                    marginLeft: 10,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: "#000",
-                    shadowOffset: {
-                      width: 0,
-                      height: 2,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                    elevation: 5,
-                    minHeight: 70,
-                  }}
-                >
-                  <View
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 14,
-                        fontWeight: "600",
-                        textAlign: "center",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Save Event
-                    </Text>
-                    <Text
-                      style={{
-                        color: "rgba(255,255,255,0.8)",
-                        fontSize: 11,
-                        textAlign: "center",
-                      }}
-                    >
-                      Add to calendar
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              {/* Time Picker Modal*/}
-              <Modal
-                visible={showTimePickerModal}
-                animationType="slide"
-                transparent={true}
+          <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
               >
                 <View
                   style={{
                     flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.5)",
                     justifyContent: "center",
+                    paddingHorizontal: 20,
                   }}
                 >
-                  <View
-                    style={{
-                      backgroundColor: "white",
-                      margin: 20,
-                      padding: 20,
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "bold",
-                        marginBottom: 15,
-                        textAlign: "center",
-                      }}
-                    >
-                      Select {isStartTime ? "Start" : "End"} Time
-                    </Text>
-
+                  <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
                     <View
                       style={{
-                        flexDirection: "row",
-                        marginBottom: 20,
+                        backgroundColor: "white",
+                        padding: 20,
+                        borderRadius: 10,
+                        zIndex: 1001,
                       }}
                     >
-                      <View style={{ flex: 2 }}>
-                        <Picker
-                          selectedValue={
-                            isStartTime ? newEvent.startTime : newEvent.endTime
-                          }
-                          onValueChange={(itemValue) =>
-                            setNewEvent({
-                              ...newEvent,
-                              [isStartTime ? "startTime" : "endTime"]:
-                                itemValue,
-                            })
-                          }
-                          style={{ height: 150 }}
-                        >
-                          {timeOptions.map((time) => (
-                            <Picker.Item key={time} label={time} value={time} />
-                          ))}
-                        </Picker>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Picker
-                          selectedValue={isStartTime ? startPeriod : endPeriod}
-                          onValueChange={(value) =>
-                            isStartTime
-                              ? setStartPeriod(value)
-                              : setEndPeriod(value)
-                          }
-                          style={{ height: 150 }}
-                        >
-                          <Picker.Item label="AM" value="AM" />
-                          <Picker.Item label="PM" value="PM" />
-                        </Picker>
-                      </View>
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={() => setShowTimePickerModal(false)}
-                      style={{
-                        backgroundColor: "#2E66E7",
-                        paddingVertical: 15,
-                        paddingHorizontal: 25,
-                        borderRadius: 8,
-                        shadowColor: "#000",
-                        shadowOffset: {
-                          width: 0,
-                          height: 2,
-                        },
-                        shadowOpacity: 0.25,
-                        shadowRadius: 3.84,
-                        elevation: 5,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "white",
-                          textAlign: "center",
-                          fontSize: 16,
-                          fontWeight: "600",
-                        }}
-                      >
-                        Confirm Time
+                      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}>
+                        Add New Event
                       </Text>
-                      <Text
+
+                      <TextInput
+                        placeholder="Event Title"
+                        value={newEvent.title}
+                        onChangeText={(text) => setNewEvent({ ...newEvent, title: text })}
                         style={{
-                          color: "rgba(255,255,255,0.8)",
-                          textAlign: "center",
-                          fontSize: 12,
-                          marginTop: 4,
+                          borderWidth: 1,
+                          borderColor: "#ddd",
+                          padding: 10,
+                          marginBottom: 10,
+                          borderRadius: 5,
                         }}
-                      >
-                        Set selected time
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Modal>
+                        returnKeyType="done"
+                        onSubmitEditing={Keyboard.dismiss}
+                      />
 
-              {/* Reminder Modal */}
-              <Modal
-                visible={showReminderModal}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowReminderModal(false)}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    zIndex: 9999,
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor: "white",
-                      width: "90%",
-                      padding: 20,
-                      borderRadius: 10,
-                      maxHeight: "80%",
-                      elevation: 5,
-                      shadowColor: "#000",
-                      shadowOffset: {
-                        width: 0,
-                        height: 2,
-                      },
-                      shadowOpacity: 0.25,
-                      shadowRadius: 3.84,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontWeight: "bold",
-                        marginBottom: 20,
-                        textAlign: "center",
-                        color: "#2d4150",
-                      }}
-                    >
-                      Set Event Reminders
-                    </Text>
+                      <TextInput
+                        placeholder="Location"
+                        value={newEvent.location}
+                        onChangeText={(text) => setNewEvent({ ...newEvent, location: text })}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: "#ddd",
+                          padding: 10,
+                          marginBottom: 10,
+                          borderRadius: 5,
+                        }}
+                        returnKeyType="done"
+                        onSubmitEditing={Keyboard.dismiss}
+                      />
 
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        marginBottom: 15,
-                        color: "#666",
-                        textAlign: "center",
-                        lineHeight: 24,
-                      }}
-                    >
-                      Select when you would like to be reminded about this event
-                    </Text>
+                      <TextInput
+                        placeholder="Notes"
+                        value={newEvent.notes}
+                        onChangeText={(text) => setNewEvent({ ...newEvent, notes: text })}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: "#ddd",
+                          padding: 10,
+                          marginBottom: 10,
+                          borderRadius: 5,
+                        }}
+                        returnKeyType="done"
+                        onSubmitEditing={Keyboard.dismiss}
+                      />
 
-                    <ScrollView style={{ maxHeight: 300 }}>
-                      {alertOptions.map((option) => (
+                      <View style={{ marginBottom: 10 }}>
+                        <Text style={{ marginBottom: 5 }}>Date</Text>
                         <TouchableOpacity
-                          key={option.value}
-                          onPress={() => toggleAlert(option.value)}
+                          onPress={() => {
+                            setShowDatePickerModal(true);
+                            setIsFollowUpScheduling(false); // Ensure we're not in follow-up mode
+                          }}
                           style={{
-                            flexDirection: "row",
-                            alignItems: "center",
+                            borderWidth: 1,
+                            borderColor: "#ddd",
                             padding: 15,
-                            borderBottomWidth: 1,
-                            borderBottomColor: "#eee",
-                            backgroundColor: selectedAlerts.includes(
-                              option.value
-                            )
-                              ? "#f0f8ff"
-                              : "white",
+                            borderRadius: 5,
+                            backgroundColor: "#f8f9fa",
+                          }}
+                        >
+                          <Text style={{ color: "#2d4150", fontSize: 16 }}>
+                            📅 {formatDate(selectedEventDate)}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{ marginBottom: 10 }}>
+                        <Text style={{ marginBottom: 5 }}>Start Time</Text>
+                        <TouchableOpacity
+                          onPress={() => openTimePicker(true)}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: "#ddd",
+                            padding: 15,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Text>
+                            {newEvent.startTime} {startPeriod}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{ marginBottom: 20 }}>
+                        <Text style={{ marginBottom: 5 }}>End Time</Text>
+                        <TouchableOpacity
+                          onPress={() => openTimePicker(false)}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: "#ddd",
+                            padding: 15,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Text>
+                            {newEvent.endTime} {endPeriod}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{ marginBottom: 20 }}>
+                        <Text style={{ marginBottom: 5 }}>Reminders</Text>
+                        <TouchableOpacity
+                          onPress={() => setShowReminderModal(true)}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: "#ddd",
+                            padding: 15,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Text>
+                            {selectedAlerts.length === 0
+                              ? "No reminders set"
+                              : `${selectedAlerts.length} reminder${
+                                  selectedAlerts.length !== 1 ? "s" : ""
+                                } set`}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{ marginBottom: 20 }}>
+                        <Text style={{ marginBottom: 5 }}>Event Type</Text>
+                        <TouchableOpacity
+                          onPress={() => setShowClassificationModal(true)}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: "#ddd",
+                            padding: 15,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Text>
+                            {EventClassification.find(
+                              (c) => c.value === newEvent.classification
+                            )?.label || "Select type"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          marginTop: 20,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            // Reset all modal states
+                            setShowEventModal(false);
+                            setShowTimePickerModal(false);
+                            setShowDatePickerModal(false);
+                            setShowReminderModal(false);
+                            setShowErrorModal(false);
+
+                            // Reset form states
+                            setNewEvent({
+                              title: "",
+                              location: "",
+                              notes: "",
+                              startTime: "12:00",
+                              endTime: "1:00",
+                              classification: "personal",
+                            });
+                            setSelectedAlerts(["15"]);
+                            setSelectedEventDate(new Date().toISOString().split("T")[0]);
+                            setStartPeriod("AM");
+                            setEndPeriod("AM");
+                            setErrorMessage("");
+                          }}
+                          style={{
+                            backgroundColor: "#f8f9fa",
+                            paddingVertical: 16,
+                            paddingHorizontal: 12,
+                            borderRadius: 8,
+                            flex: 1,
+                            marginRight: 10,
+                            borderWidth: 1,
+                            borderColor: "#dee2e6",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minHeight: 60,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "#495057",
+                              fontSize: 18,
+                              fontWeight: "600",
+                              textAlign: "center",
+                            }}
+                          >
+                            Cancel Event
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={addEvent}
+                          style={{
+                            backgroundColor: "#2E66E7",
+                            paddingVertical: 16,
+                            paddingHorizontal: 12,
+                            borderRadius: 8,
+                            flex: 1,
+                            marginLeft: 10,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            shadowColor: "#000",
+                            shadowOffset: {
+                              width: 0,
+                              height: 2,
+                            },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5,
+                            minHeight: 60,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "white",
+                              fontSize: 18,
+                              fontWeight: "600",
+                              textAlign: "center",
+                            }}
+                          >
+                            Save Event
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Time Picker Modal*/}
+                      <Modal
+                        visible={showTimePickerModal}
+                        animationType="slide"
+                        transparent={true}
+                      >
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "rgba(0,0,0,0.5)",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                              <View
+                                style={{
+                                  backgroundColor: "white",
+                                  margin: 20,
+                                  padding: 20,
+                                  borderRadius: 10,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: "bold",
+                                    marginBottom: 15,
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Select {isStartTime ? "Start" : "End"} Time
+                                </Text>
+
+                                <View
+                                  style={{
+                                    flexDirection: "row",
+                                    marginBottom: 20,
+                                  }}
+                                >
+                                  <View style={{ flex: 2 }}>
+                                    <Picker
+                                      selectedValue={
+                                        isStartTime ? newEvent.startTime : newEvent.endTime
+                                      }
+                                      onValueChange={(itemValue) =>
+                                        setNewEvent({
+                                          ...newEvent,
+                                          [isStartTime ? "startTime" : "endTime"]:
+                                            itemValue,
+                                        })
+                                      }
+                                      style={{ height: 150 }}
+                                    >
+                                      {timeOptions.map((time) => (
+                                        <Picker.Item key={time} label={time} value={time} />
+                                      ))}
+                                    </Picker>
+                                  </View>
+                                  <View style={{ flex: 1 }}>
+                                    <Picker
+                                      selectedValue={isStartTime ? startPeriod : endPeriod}
+                                      onValueChange={(value) =>
+                                        isStartTime
+                                          ? setStartPeriod(value)
+                                          : setEndPeriod(value)
+                                      }
+                                      style={{ height: 150 }}
+                                    >
+                                      <Picker.Item label="AM" value="AM" />
+                                      <Picker.Item label="PM" value="PM" />
+                                    </Picker>
+                                  </View>
+                                </View>
+
+                                <TouchableOpacity
+                                  onPress={() => setShowTimePickerModal(false)}
+                                  style={{
+                                    backgroundColor: "#2E66E7",
+                                    paddingVertical: 15,
+                                    paddingHorizontal: 25,
+                                    borderRadius: 8,
+                                    shadowColor: "#000",
+                                    shadowOffset: {
+                                      width: 0,
+                                      height: 2,
+                                    },
+                                    shadowOpacity: 0.25,
+                                    shadowRadius: 3.84,
+                                    elevation: 5,
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      color: "white",
+                                      textAlign: "center",
+                                      fontSize: 16,
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Confirm Time
+                                  </Text>
+                                  <Text
+                                    style={{
+                                      color: "rgba(255,255,255,0.8)",
+                                      textAlign: "center",
+                                      fontSize: 12,
+                                      marginTop: 4,
+                                    }}
+                                  >
+                                    Set selected time
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </TouchableWithoutFeedback>
+                          </View>
+                        </TouchableWithoutFeedback>
+                      </Modal>
+
+                      {/* Reminder Modal */}
+                      <Modal
+                        visible={showReminderModal}
+                        animationType="slide"
+                        transparent={true}
+                        onRequestClose={() => setShowReminderModal(false)}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 9999,
                           }}
                         >
                           <View
                             style={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: 12,
-                              borderWidth: 2,
-                              borderColor: "#2E66E7",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              marginRight: 15,
+                              backgroundColor: "white",
+                              width: "90%",
+                              padding: 20,
+                              borderRadius: 10,
+                              maxHeight: "80%",
+                              elevation: 5,
+                              shadowColor: "#000",
+                              shadowOffset: {
+                                width: 0,
+                                height: 2,
+                              },
+                              shadowOpacity: 0.25,
+                              shadowRadius: 3.84,
                             }}
                           >
-                            {selectedAlerts.includes(option.value) && (
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                fontWeight: "bold",
+                                marginBottom: 20,
+                                textAlign: "center",
+                                color: "#2d4150",
+                              }}
+                            >
+                              Set Event Reminders
+                            </Text>
+
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                marginBottom: 15,
+                                color: "#666",
+                                textAlign: "center",
+                                lineHeight: 24,
+                              }}
+                            >
+                              Select when you would like to be reminded about this event
+                            </Text>
+
+                            <ScrollView style={{ maxHeight: 300 }}>
+                              {alertOptions.map((option) => (
+                                <TouchableOpacity
+                                  key={option.value}
+                                  onPress={() => toggleAlert(option.value)}
+                                  style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    padding: 15,
+                                    borderBottomWidth: 1,
+                                    borderBottomColor: "#eee",
+                                    backgroundColor: selectedAlerts.includes(
+                                      option.value
+                                    )
+                                      ? "#f0f8ff"
+                                      : "white",
+                                  }}
+                                >
+                                  <View
+                                    style={{
+                                      width: 24,
+                                      height: 24,
+                                      borderRadius: 12,
+                                      borderWidth: 2,
+                                      borderColor: "#2E66E7",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      marginRight: 15,
+                                    }}
+                                  >
+                                    {selectedAlerts.includes(option.value) && (
+                                      <View
+                                        style={{
+                                          width: 12,
+                                          height: 12,
+                                          borderRadius: 6,
+                                          backgroundColor: "#2E66E7",
+                                        }}
+                                      />
+                                    )}
+                                  </View>
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      color: selectedAlerts.includes(option.value)
+                                        ? "#2E66E7"
+                                        : "#333",
+                                    }}
+                                  >
+                                    {option.label}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </ScrollView>
+
+                            <TouchableOpacity
+                              onPress={() => setShowReminderModal(false)}
+                              style={{
+                                backgroundColor: "#2E66E7",
+                                padding: 15,
+                                borderRadius: 8,
+                                marginTop: 20,
+                                alignItems: "center",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  color: "white",
+                                  fontSize: 16,
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Confirm Reminders
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </Modal>
+
+                      {/* Classification Modal */}
+                      <Modal
+                        visible={showClassificationModal}
+                        animationType="slide"
+                        transparent={true}
+                      >
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "rgba(0,0,0,0.5)",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                               <View
                                 style={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: 6,
-                                  backgroundColor: "#2E66E7",
+                                  backgroundColor: "white",
+                                  margin: 20,
+                                  padding: 20,
+                                  borderRadius: 10,
                                 }}
-                              />
-                            )}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: "bold",
+                                    marginBottom: 15,
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Select Event Type
+                                </Text>
+
+                                {EventClassification.map((option) => (
+                                  <TouchableOpacity
+                                    key={option.value}
+                                    onPress={() => {
+                                      setNewEvent({
+                                        ...newEvent,
+                                        classification: option.value,
+                                      });
+                                      setSelectedClassification(option.value);
+                                      setShowClassificationModal(false);
+                                    }}
+                                    style={{
+                                      flexDirection: "row",
+                                      alignItems: "center",
+                                      padding: 20,
+                                      borderBottomWidth: 1,
+                                      borderBottomColor: "#eee",
+                                      backgroundColor:
+                                        newEvent.classification === option.value
+                                          ? "#f0f8ff"
+                                          : "white",
+                                    }}
+                                  >
+                                    <View
+                                      style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: 15,
+                                        borderWidth: 2,
+                                        borderColor: "#2E66E7",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        marginRight: 15,
+                                      }}
+                                    >
+                                      {newEvent.classification === option.value && (
+                                        <View
+                                          style={{
+                                            width: 16,
+                                            height: 16,
+                                            borderRadius: 8,
+                                            backgroundColor: "#2E66E7",
+                                          }}
+                                        />
+                                      )}
+                                    </View>
+                                    <Text
+                                      style={{
+                                        fontSize: 18,
+                                        color:
+                                          newEvent.classification === option.value
+                                            ? "#2E66E7"
+                                            : "#333",
+                                      }}
+                                    >
+                                      {option.label}
+                                    </Text>
+                                  </TouchableOpacity>
+                                ))}
+
+                                <TouchableOpacity
+                                  onPress={() => setShowClassificationModal(false)}
+                                  style={{
+                                    backgroundColor: "#2E66E7",
+                                    padding: 15,
+                                    borderRadius: 8,
+                                    marginTop: 20,
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      color: "white",
+                                      fontSize: 16,
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Cancel
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </TouchableWithoutFeedback>
                           </View>
-                          <Text
-                            style={{
-                              fontSize: 16,
-                              color: selectedAlerts.includes(option.value)
-                                ? "#2E66E7"
-                                : "#333",
-                            }}
-                          >
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
+                        </TouchableWithoutFeedback>
+                      </Modal>
 
-                    <TouchableOpacity
-                      onPress={() => setShowReminderModal(false)}
-                      style={{
-                        backgroundColor: "#2E66E7",
-                        padding: 15,
-                        borderRadius: 8,
-                        marginTop: 20,
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "white",
-                          fontSize: 16,
-                          fontWeight: "600",
-                        }}
+                      {/* Date Picker Modal for New Event */}
+                      <Modal
+                        visible={showDatePickerModal && !isFollowUpScheduling}
+                        animationType="none"
+                        transparent={true}
+                        statusBarTranslucent={true}
                       >
-                        Confirm Reminders
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Modal>
-
-              {/* Classification Modal */}
-              <Modal
-                visible={showClassificationModal}
-                animationType="slide"
-                transparent={true}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      backgroundColor: "white",
-                      margin: 20,
-                      padding: 20,
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "bold",
-                        marginBottom: 15,
-                        textAlign: "center",
-                      }}
-                    >
-                      Select Event Type
-                    </Text>
-
-                    {EventClassification.map((option) => (
-                      <TouchableOpacity
-                        key={option.value}
-                        onPress={() => {
-                          setNewEvent({
-                            ...newEvent,
-                            classification: option.value,
-                          });
-                          setSelectedClassification(option.value);
-                          setShowClassificationModal(false);
-                        }}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          padding: 20,
-                          borderBottomWidth: 1,
-                          borderBottomColor: "#eee",
-                          backgroundColor:
-                            newEvent.classification === option.value
-                              ? "#f0f8ff"
-                              : "white",
-                        }}
-                      >
-                        <View
+                        <Pressable
                           style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: 15,
-                            borderWidth: 2,
-                            borderColor: "#2E66E7",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: "rgba(0,0,0,0.5)",
                             justifyContent: "center",
                             alignItems: "center",
-                            marginRight: 15,
                           }}
+                          onPress={() => setShowDatePickerModal(false)}
                         >
-                          {newEvent.classification === option.value && (
-                            <View
+                          <Pressable
+                            style={{
+                              backgroundColor: "white",
+                              width: "90%",
+                              padding: 20,
+                              borderRadius: 10,
+                              maxHeight: "90%",
+                              shadowColor: "#000",
+                              shadowOffset: {
+                                width: 0,
+                                height: 2,
+                              },
+                              shadowOpacity: 0.25,
+                              shadowRadius: 3.84,
+                            }}
+                            onPress={(e) => e.stopPropagation()}
+                          >
+                            <Text
                               style={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: 8,
-                                backgroundColor: "#2E66E7",
+                                fontSize: 20,
+                                fontWeight: "bold",
+                                marginBottom: 10,
+                                textAlign: "center",
+                                color: "#2E66E7",
+                              }}
+                            >
+                              Select Event Date
+                            </Text>
+
+                            <Calendar
+                              current={selectedEventDate}
+                              onDayPress={(day: { dateString: string }) => {
+                                setSelectedEventDate(day.dateString);
+                                setShowDatePickerModal(false);
+                              }}
+                              markedDates={{
+                                [selectedEventDate]: {
+                                  selected: true,
+                                  selectedColor: "#2E66E7",
+                                },
+                              }}
+                              style={{
+                                borderRadius: 10,
+                                borderWidth: 1,
+                                borderColor: "#E5E5E5",
+                                marginBottom: 20,
+                              }}
+                              theme={{
+                                backgroundColor: "#ffffff",
+                                calendarBackground: "#ffffff",
+                                selectedDayBackgroundColor: "#2E66E7",
+                                selectedDayTextColor: "#ffffff",
+                                todayTextColor: "#2E66E7",
+                                dayTextColor: "#2d4150",
+                                textDisabledColor: "#d9e1e8",
+                                dotColor: "#2E66E7",
+                                selectedDotColor: "#ffffff",
+                                arrowColor: "#2E66E7",
+                                monthTextColor: "#2d4150",
+                                textDayFontSize: 16,
+                                textMonthFontSize: 18,
+                                textDayHeaderFontSize: 14,
                               }}
                             />
-                          )}
-                        </View>
-                        <Text
-                          style={{
-                            fontSize: 18,
-                            color:
-                              newEvent.classification === option.value
-                                ? "#2E66E7"
-                                : "#333",
-                          }}
-                        >
-                          {option.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-
-                    <TouchableOpacity
-                      onPress={() => setShowClassificationModal(false)}
-                      style={{
-                        backgroundColor: "#2E66E7",
-                        padding: 15,
-                        borderRadius: 8,
-                        marginTop: 20,
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "white",
-                          fontSize: 16,
-                          fontWeight: "600",
-                        }}
-                      >
-                        Cancel
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                          </Pressable>
+                        </Pressable>
+                      </Modal>
+                    </View>
+                  </TouchableWithoutFeedback>
                 </View>
-              </Modal>
-
-              {/* Date Picker Modal for New Event */}
-              <Modal
-                visible={showDatePickerModal && !isFollowUpScheduling}
-                animationType="none"
-                transparent={true}
-                statusBarTranslucent={true}
-              >
-                <Pressable
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  onPress={() => setShowDatePickerModal(false)}
-                >
-                  <Pressable
-                    style={{
-                      backgroundColor: "white",
-                      width: "90%",
-                      padding: 20,
-                      borderRadius: 10,
-                      maxHeight: "90%",
-                      shadowColor: "#000",
-                      shadowOffset: {
-                        width: 0,
-                        height: 2,
-                      },
-                      shadowOpacity: 0.25,
-                      shadowRadius: 3.84,
-                    }}
-                    onPress={(e) => e.stopPropagation()}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontWeight: "bold",
-                        marginBottom: 10,
-                        textAlign: "center",
-                        color: "#2E66E7",
-                      }}
-                    >
-                      Select Event Date
-                    </Text>
-
-                    <Calendar
-                      current={selectedEventDate}
-                      onDayPress={(day: { dateString: string }) => {
-                        setSelectedEventDate(day.dateString);
-                        setShowDatePickerModal(false);
-                      }}
-                      markedDates={{
-                        [selectedEventDate]: {
-                          selected: true,
-                          selectedColor: "#2E66E7",
-                        },
-                      }}
-                      style={{
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderColor: "#E5E5E5",
-                        marginBottom: 20,
-                      }}
-                      theme={{
-                        backgroundColor: "#ffffff",
-                        calendarBackground: "#ffffff",
-                        selectedDayBackgroundColor: "#2E66E7",
-                        selectedDayTextColor: "#ffffff",
-                        todayTextColor: "#2E66E7",
-                        dayTextColor: "#2d4150",
-                        textDisabledColor: "#d9e1e8",
-                        dotColor: "#2E66E7",
-                        selectedDotColor: "#ffffff",
-                        arrowColor: "#2E66E7",
-                        monthTextColor: "#2d4150",
-                        textDayFontSize: 16,
-                        textMonthFontSize: 18,
-                        textDayHeaderFontSize: 14,
-                      }}
-                    />
-                  </Pressable>
-                </Pressable>
-              </Modal>
+              </KeyboardAvoidingView>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
 
         {/* Reminder Options Modal */}
