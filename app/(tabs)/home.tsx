@@ -22,6 +22,7 @@ import ClaimPointsModal from "../../components/ClaimPointsModal";
 import { getAppleFirstName } from "../auth/appleauth";
 import { LinearGradient } from "expo-linear-gradient";
 import { eventTypeStyles } from "../styles/eventStyles";
+import TotalPoints from "../../components/TotalPoints";
 
 type DayMarking = {
   marked?: boolean;
@@ -55,7 +56,7 @@ interface Task {
   text: string;
   points: number;
   isCustom?: boolean;
-  repeatFrequency?: 'none' | 'daily' | 'weekly' | 'monthly';
+  repeatFrequency?: "none" | "daily" | "weekly" | "monthly";
   lastCompleted?: string | null;
 }
 
@@ -72,14 +73,62 @@ interface RepeatOption {
 }
 
 const ALL_TASKS: Task[] = [
-  { id: 1, text: "Schedule eye exam", points: 10, repeatFrequency: 'none', lastCompleted: null },
-  { id: 2, text: "Check blood sugar levels", points: 5, repeatFrequency: 'none', lastCompleted: null },
-  { id: 3, text: "Take prescribed medication", points: 5, repeatFrequency: 'none', lastCompleted: null },
-  { id: 4, text: "Exercise for 30 minutes", points: 15, repeatFrequency: 'none', lastCompleted: null },
-  { id: 5, text: "Eat a healthy meal", points: 10, repeatFrequency: 'none', lastCompleted: null },
-  { id: 6, text: "Drink 8 glasses of water", points: 8, repeatFrequency: 'none', lastCompleted: null },
-  { id: 7, text: "Meditate for 10 minutes", points: 7, repeatFrequency: 'none', lastCompleted: null },
-  { id: 8, text: "Get 8 hours of sleep", points: 12, repeatFrequency: 'none', lastCompleted: null },
+  {
+    id: 1,
+    text: "Schedule eye exam",
+    points: 10,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 2,
+    text: "Check blood sugar levels",
+    points: 5,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 3,
+    text: "Take prescribed medication",
+    points: 5,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 4,
+    text: "Exercise for 30 minutes",
+    points: 15,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 5,
+    text: "Eat a healthy meal",
+    points: 10,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 6,
+    text: "Drink 8 glasses of water",
+    points: 8,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 7,
+    text: "Meditate for 10 minutes",
+    points: 7,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
+  {
+    id: 8,
+    text: "Get 8 hours of sleep",
+    points: 12,
+    repeatFrequency: "none",
+    lastCompleted: null,
+  },
 ];
 
 const parseEventDetails = (event: ExpoCalendar.Event) => {
@@ -135,7 +184,7 @@ export default function HomeScreen() {
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskPoints, setNewTaskPoints] = useState("5");
   const [shouldRepeat, setShouldRepeat] = useState(false);
-  const [repeatFrequency, setRepeatFrequency] = useState('none');
+  const [repeatFrequency, setRepeatFrequency] = useState("none");
 
   const REPEAT_OPTIONS: RepeatOption[] = [
     { label: "Daily", value: "daily" },
@@ -156,13 +205,15 @@ export default function HomeScreen() {
         if (data.lastUpdated !== today) {
           const shuffled = [...ALL_TASKS].sort(() => 0.5 - Math.random());
           const selected = shuffled.slice(0, 5);
-          
+
           // Filter and add repeating tasks
-          const repeatingTasks = data.dailyTasks.filter(task => 
-            task.isCustom && task.repeatFrequency !== 'none' &&
-            shouldShowRepeatingTask(task, today)
+          const repeatingTasks = data.dailyTasks.filter(
+            (task) =>
+              task.isCustom &&
+              task.repeatFrequency !== "none" &&
+              shouldShowRepeatingTask(task, today)
           );
-          
+
           setDailyTasks([...selected, ...repeatingTasks]);
 
           await AsyncStorage.setItem(
@@ -187,17 +238,20 @@ export default function HomeScreen() {
 
     const shouldShowRepeatingTask = (task: Task, today: string) => {
       if (!task.lastCompleted) return true;
-      
+
       const lastCompleted = new Date(task.lastCompleted);
       const currentDate = new Date(today);
-      
+
       switch (task.repeatFrequency) {
-        case 'daily':
+        case "daily":
           return lastCompleted.getDate() !== currentDate.getDate();
-        case 'weekly':
-          const weekDiff = Math.floor((currentDate.getTime() - lastCompleted.getTime()) / (1000 * 60 * 60 * 24 * 7));
+        case "weekly":
+          const weekDiff = Math.floor(
+            (currentDate.getTime() - lastCompleted.getTime()) /
+              (1000 * 60 * 60 * 24 * 7)
+          );
           return weekDiff >= 1;
-        case 'monthly':
+        case "monthly":
           return lastCompleted.getMonth() !== currentDate.getMonth();
         default:
           return false;
@@ -350,7 +404,7 @@ export default function HomeScreen() {
         text: newTaskText.trim(),
         points: parseInt(newTaskPoints) || 5,
         isCustom: true,
-        repeatFrequency: shouldRepeat ? repeatFrequency : 'none',
+        repeatFrequency: shouldRepeat ? repeatFrequency : "none",
         lastCompleted: null,
       };
 
@@ -384,6 +438,7 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
+        <TotalPoints />
         <Text style={styles.welcomeText}>Welcome!</Text>
         {isLoading ? (
           <Text style={styles.loadingText}>Fetching Apple ID...</Text>
@@ -815,7 +870,7 @@ export default function HomeScreen() {
         >
           <View style={styles.addTaskModalContent}>
             <Text style={styles.addTaskModalTitle}>Add New Task</Text>
-            
+
             <TextInput
               style={styles.addTaskInput}
               placeholder="Enter task description"
@@ -824,7 +879,7 @@ export default function HomeScreen() {
               multiline={true}
               maxLength={100}
             />
-            
+
             <View style={styles.pointsInputContainer}>
               <Text style={styles.pointsInputLabel}>Points:</Text>
               <TextInput
@@ -843,7 +898,7 @@ export default function HomeScreen() {
                 value={shouldRepeat}
                 onValueChange={(value) => {
                   setShouldRepeat(value);
-                  if (!value) setRepeatFrequency('none');
+                  if (!value) setRepeatFrequency("none");
                 }}
                 trackColor={{ false: "#767577", true: "#095da7" }}
                 thumbColor={shouldRepeat ? "#fff" : "#f4f3f4"}
@@ -857,14 +912,16 @@ export default function HomeScreen() {
                     key={option.value}
                     style={[
                       styles.repeatOption,
-                      repeatFrequency === option.value && styles.repeatOptionSelected,
+                      repeatFrequency === option.value &&
+                        styles.repeatOptionSelected,
                     ]}
                     onPress={() => setRepeatFrequency(option.value)}
                   >
                     <Text
                       style={[
                         styles.repeatOptionText,
-                        repeatFrequency === option.value && styles.repeatOptionTextSelected,
+                        repeatFrequency === option.value &&
+                          styles.repeatOptionTextSelected,
                       ]}
                     >
                       {option.label}
@@ -880,12 +937,12 @@ export default function HomeScreen() {
                 onPress={() => {
                   setShowAddTaskModal(false);
                   setShouldRepeat(false);
-                  setRepeatFrequency('none');
+                  setRepeatFrequency("none");
                 }}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.modalButton, styles.addButton]}
                 onPress={addCustomTask}
@@ -1030,9 +1087,9 @@ const styles = StyleSheet.create({
     color: "black",
   },
   checklistHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 15,
   },
   taskItem: {
@@ -1259,23 +1316,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   addTaskButton: {
-    backgroundColor: '#095da7',
+    backgroundColor: "#095da7",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   addTaskButtonText: {
-    color: 'white',
-    fontWeight: '600',
+    color: "white",
+    fontWeight: "600",
     fontSize: 14,
   },
   addTaskModalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 15,
     padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-    shadowColor: '#000',
+    width: "90%",
+    maxHeight: "80%",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -1286,43 +1343,43 @@ const styles = StyleSheet.create({
   },
   addTaskModalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    color: '#2d4150',
-    textAlign: 'center',
+    color: "#2d4150",
+    textAlign: "center",
   },
   addTaskInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 15,
     minHeight: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   pointsInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   pointsInputLabel: {
     fontSize: 16,
     marginRight: 10,
-    color: '#2d4150',
+    color: "#2d4150",
   },
   pointsInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 8,
     width: 60,
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   addTaskModalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   modalButton: {
     flex: 1,
@@ -1331,62 +1388,62 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   cancelButton: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: "#dee2e6",
   },
   addButton: {
-    backgroundColor: '#095da7',
+    backgroundColor: "#095da7",
   },
   cancelButtonText: {
-    color: '#495057',
-    textAlign: 'center',
-    fontWeight: '600',
+    color: "#495057",
+    textAlign: "center",
+    fontWeight: "600",
     fontSize: 16,
   },
   addButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: '600',
+    color: "white",
+    textAlign: "center",
+    fontWeight: "600",
     fontSize: 16,
   },
   repeatContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 15,
     paddingHorizontal: 5,
   },
   repeatLabel: {
     fontSize: 16,
-    color: '#2d4150',
-    fontWeight: '600',
+    color: "#2d4150",
+    fontWeight: "600",
   },
   repeatOptionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   repeatOption: {
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     marginBottom: 8,
-    width: '48%',
-    alignItems: 'center',
+    width: "48%",
+    alignItems: "center",
   },
   repeatOptionSelected: {
-    backgroundColor: '#095da7',
-    borderColor: '#095da7',
+    backgroundColor: "#095da7",
+    borderColor: "#095da7",
   },
   repeatOptionText: {
     fontSize: 14,
-    color: '#2d4150',
-    fontWeight: '500',
+    color: "#2d4150",
+    fontWeight: "500",
   },
   repeatOptionTextSelected: {
-    color: '#fff',
+    color: "#fff",
   },
 });

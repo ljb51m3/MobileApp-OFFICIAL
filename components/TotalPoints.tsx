@@ -14,15 +14,18 @@ const TotalPoints: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+    position: "absolute",
+    top: 10,
+    right: 10,
     backgroundColor: "white",
     padding: 12,
     borderRadius: 20,
-    alignSelf: "flex-end",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    zIndex: 1,
   },
   text: {
     fontSize: 16,

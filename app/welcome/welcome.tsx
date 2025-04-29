@@ -74,7 +74,7 @@ export default function WelcomeScreen() {
 
       <View style={styles.buttonContainer}>
         <Image
-          source={require("../../assets/images/eye.png")}
+          source={require("../../assets/images/MainEye.png")}
           style={{ width: 100, height: 100 }}
         />
         <Text
