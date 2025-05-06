@@ -3,14 +3,12 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
   TextInput,
   Image,
   ScrollView,
   TouchableOpacity,
   Platform,
   Switch,
-  Animated,
   Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";

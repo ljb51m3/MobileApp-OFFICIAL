@@ -30,6 +30,15 @@ interface Log {
 
 const STORAGE_KEY = "userLogs";
 
+const TODAY_SELECTIONS_KEY = "todaySelections";
+const LAST_SAVED_DATE_KEY = "lastSavedDate";
+
+interface DailySelections {
+  sleep: string;
+  eating: string;
+  exercise: string;
+}
+
 const Tracker: React.FC = () => {
   const [sleep, setSleep] = useState<string>("");
   const [eating, setEating] = useState<string>("");
@@ -46,6 +55,7 @@ const Tracker: React.FC = () => {
   const [sortedLogs, setSortedLogs] = useState<Log[]>([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadLogs = async () => {
@@ -93,7 +103,45 @@ const Tracker: React.FC = () => {
     }
   }, [logs]);
 
-  const handleTrackerSelection = (category: string, value: string) => {
+  useEffect(() => {
+    const loadAndResetSelections = async () => {
+      try {
+        const today = getTodayDateString();
+        const lastSavedDate = await AsyncStorage.getItem(LAST_SAVED_DATE_KEY);
+
+        if (lastSavedDate !== today) {
+          await AsyncStorage.multiRemove([
+            TODAY_SELECTIONS_KEY,
+            LAST_SAVED_DATE_KEY,
+          ]);
+          await AsyncStorage.setItem(LAST_SAVED_DATE_KEY, today);
+          setSleep("");
+          setEating("");
+          setExercise("");
+          return;
+        }
+
+        const savedSelections = await AsyncStorage.getItem(
+          TODAY_SELECTIONS_KEY
+        );
+        if (savedSelections) {
+          const parsedSelections: DailySelections = JSON.parse(savedSelections);
+          setSleep(parsedSelections.sleep);
+          setEating(parsedSelections.eating);
+          setExercise(parsedSelections.exercise);
+        }
+      } catch (error) {
+        console.error("Error loading/resetting selections:", error);
+      }
+    };
+
+    loadAndResetSelections();
+  }, []);
+
+  const handleTrackerSelection = async (
+    category: keyof DailySelections,
+    value: string
+  ) => {
     switch (category) {
       case "sleep":
         setSleep(value);
@@ -105,7 +153,34 @@ const Tracker: React.FC = () => {
         setExercise(value);
         break;
       default:
-        break;
+        const exhaustiveCheck: never = category;
+        return exhaustiveCheck;
+    }
+
+    try {
+      const selections: DailySelections = {
+        sleep: category === "sleep" ? value : sleep,
+        eating: category === "eating" ? value : eating,
+        exercise: category === "exercise" ? value : exercise,
+      };
+      await AsyncStorage.setItem(
+        TODAY_SELECTIONS_KEY,
+        JSON.stringify(selections)
+      );
+    } catch (error) {
+      console.error("Error saving selection:", error);
+      // Revert UI if save fails
+      switch (category) {
+        case "sleep":
+          setSleep("");
+          break;
+        case "eating":
+          setEating("");
+          break;
+        case "exercise":
+          setExercise("");
+          break;
+      }
     }
   };
 
@@ -118,38 +193,35 @@ const Tracker: React.FC = () => {
     const today = getTodayDateString();
     const now = Date.now();
 
-    const existingLogIndex = logs.findIndex((log) => log.date === today);
-    const isNewLog = existingLogIndex === -1;
-
     try {
-      let updatedLogs = [...logs];
-      if (!isNewLog) {
-        const existingLogIndex = logs.findIndex((log) => log.date === today);
-        updatedLogs[existingLogIndex] = {
-          ...updatedLogs[existingLogIndex],
-          sleep,
-          eating,
-          exercise,
-          timestamp: now,
-        };
+      const updatedLogs = [...logs];
+      const existingLogIndex = updatedLogs.findIndex(
+        (log) => log.date === today
+      );
+
+      const logEntry: Log = {
+        id: now.toString(),
+        sleep,
+        eating,
+        exercise,
+        date: today,
+        timestamp: now,
+        viewed: false,
+      };
+
+      if (existingLogIndex !== -1) {
+        updatedLogs[existingLogIndex] = logEntry;
         Alert.alert("Success", "Today's log updated successfully!");
       } else {
-        const newLog: Log = {
-          id: now.toString(),
-          sleep,
-          eating,
-          exercise,
-          date: today,
-          timestamp: now,
-          viewed: false,
-        };
-        updatedLogs.unshift(newLog);
+        updatedLogs.unshift(logEntry);
         setUnviewedLogCount((prev) => prev + 1);
         setClaimPointsModalVisible(true);
         setShowBadge(true);
       }
 
       setLogs(updatedLogs);
+
+      await AsyncStorage.removeItem(TODAY_SELECTIONS_KEY);
     } catch (error) {
       console.error("Error saving log:", error);
       Alert.alert("Error", "Failed to save log");

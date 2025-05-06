@@ -59,10 +59,9 @@ export default function WelcomeScreen() {
     <View style={styles.container}>
       <LinearGradient
         colors={[
-          "rgba(0, 86, 224, 0.86)",
-          "rgba(1, 107, 255, 0.8)",
-          "rgba(0, 179, 255, 0.93)",
-          "rgba(85, 210, 255, 0.93)",
+          "rgba(0, 67, 133, 0.86)",
+          "rgba(0, 113, 220, 0.8)",
+          "rgba(127, 185, 255, 0.93)",
         ]}
         style={styles.background}
       />
@@ -80,7 +79,7 @@ export default function WelcomeScreen() {
         <Text
           style={{
             fontSize: 40,
-            color: "#0f3180",
+            color: "#095da7",
             fontWeight: "bold",
             marginBottom: 20,
           }}
@@ -92,7 +91,7 @@ export default function WelcomeScreen() {
           onPress={() => router.push("/welcome/login")}
           style={styles.button}
         >
-          <Text style={{ fontSize: 16, color: "#0f3180", fontWeight: "bold" }}>
+          <Text style={{ fontSize: 16, color: "#fff", fontWeight: "bold" }}>
             Sign In
           </Text>
         </TouchableOpacity>
@@ -150,7 +149,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: 250,
-    backgroundColor: "#d6f3ff",
+    backgroundColor: "#095da7",
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 16,
@@ -158,6 +157,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: 10,
     borderWidth: 1,
-    borderColor: "#a6e6ff",
+    borderColor: "#095da7",
   },
 });
